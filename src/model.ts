@@ -104,30 +104,3 @@ export function uid(): string {
 export function currentQuarter(s: AppState): Quarter | null {
   return s.quarters.find((q) => q.id === s.currentQuarterId) ?? s.quarters[s.quarters.length - 1] ?? null;
 }
-
-/* dev fixture */
-export function seedState(): AppState {
-  let n = 0;
-  const a = (name: string, month: number, day: number, status: Status, time: number | null = null): Assignment => ({
-    id: uid(), name, month, day, year: 2026, time, status, createdAt: ++n,
-  });
-  const c = (name: string, assignments: Assignment[] = []): Course => ({ id: uid(), name, assignments });
-  const fall: Quarter = {
-    id: uid(),
-    name: 'fall 26',
-    phrase: 'the world is my oyster',
-    courses: [
-      c('45C', [a('hw7', 11, 20, 'done!'), a('code review 7', 11, 20, 'done!'), a('quiz6', 11, 19, 'EXAM:)'), a('hw8', 11, 25, 'planned')]),
-      c('6D', [a('hw8', 11, 22, 'planned'), a('quiz8', 11, 22, 'planned', 9 * 60), a('quiz9', 11, 27, 'planned'), a('exam 4', 12, 3, 'EXAM!!'), a('hw9', 12, 4, 'planned')]),
-      c('COGS120A', [a('midterm', 11, 5, 'EXAM:)'), a('assignment', 10, 25, 'done!')]),
-      c('DRAMA', [a('week9', 11, 23, 'planned'), a('quiz9', 11, 23, 'planned'), a('week10', 11, 30, 'working..'), a('final', 12, 6, 'EXAM!!')]),
-    ],
-  };
-  const winter: Quarter = {
-    id: uid(),
-    name: 'winter 27',
-    phrase: 'cold hands warm heart',
-    courses: [c('45D'), c('6E'), c('COGS121')],
-  };
-  return { quarters: [fall, winter], currentQuarterId: fall.id };
-}

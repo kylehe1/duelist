@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { supabase } from './supabase';
-import { emptyState, seedState, type AppState } from './model';
+import { emptyState, type AppState } from './model';
 
 interface Cache { data: AppState; updatedAt: string; }
 
@@ -112,12 +112,6 @@ export function StoreProvider({ userId, children }: { userId: string; children: 
     };
   }, [pull, flush]);
 
-  useEffect(() => {
-    if (!import.meta.env.DEV) return;
-    const w = window as unknown as { __seed?: () => void };
-    w.__seed = () => update((d) => Object.assign(d, seedState()));
-    return () => { delete w.__seed; };
-  }, [update]);
 
   const value = useMemo(() => ({ state, ready, update, flush, focusKey }), [state, ready, update, flush]);
   return <StoreCtx.Provider value={value}>{children}</StoreCtx.Provider>;
