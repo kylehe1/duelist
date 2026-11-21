@@ -76,12 +76,18 @@ export function parseTimeInput(v: string): number | null {
 }
 
 export const PHRASES = [
-  'the world is my oyster',
   'slow and steady',
   'one thing at a time',
   'make it fun',
   'future me says thanks',
   'cold hands warm heart',
+  'even snails get there',
+  'the moon never rushes',
+  'rome took a while too',
+  'tea first, then everything',
+  'small steps still count',
+  'water always finds a way',
+  'good enough is good enough',
 ];
 export const randomPhrase = () => PHRASES[Math.floor(Math.random() * PHRASES.length)];
 
