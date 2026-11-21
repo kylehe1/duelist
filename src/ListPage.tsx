@@ -175,6 +175,8 @@ function MobileList({ q }: { q: Quarter }) {
 
   // remember the class; keep the active tab visible
   const activeId = q.courses[idx]?.id;
+  const { setStatusFor } = ui;
+  useEffect(() => { setStatusFor(null); }, [activeId]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (activeId) { try { localStorage.setItem(lastClassKey(q.id), activeId); } catch { /* ignore */ } }
     const box = tabs.current;
@@ -206,6 +208,7 @@ function MobileList({ q }: { q: Quarter }) {
     if (d.mode === 'pending') {
       if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) {
         d.mode = 'h';
+        ui.setStatusFor(null);
         viewport.current?.setPointerCapture(e.pointerId);
         if (track.current) track.current.style.transition = 'none';
       } else {

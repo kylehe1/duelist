@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useStore } from './store';
 import { noAuto } from './components';
 import {
@@ -140,7 +140,7 @@ function AddForm({ initial, submitLabel, onSubmit, onCancel }: {
         <button className="addform-cancel" onClick={onCancel}>cancel</button>
         <button
           type="button"
-          className={`chip ${exam ? 'chip-exam' : 'chip-planned'} kind-toggle`}
+          className={`chip ${exam ? 'st-exam' : 'st-planned'} kind-toggle`}
           aria-pressed={exam}
           aria-label={exam ? 'type: exam, tap to make it an assignment' : 'type: assignment, tap to make it an exam'}
           onClick={() => setExam((e) => !e)}
@@ -193,16 +193,43 @@ function StatusPicker({ a, courseId, small }: { a: Assignment; courseId: string;
   const { update } = useStore();
   const ui = useListUI();
   const open = ui.statusFor === a.id;
+  const wrap = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const menu = useRef<HTMLDivElement>(null);
+  const [up, setUp] = useState(false);
+  const options = statusOptions(a.status);
 
-  useEffect(() => {
-    if (open) menu.current?.querySelector<HTMLElement>('[aria-checked="true"]')?.focus();
+  // flip upward if there isn't room below (viewport on desktop, panel on mobile); focus the current row
+  useLayoutEffect(() => {
+    if (!open) { setUp(false); return; }
+    const m = menu.current;
+    const w = wrap.current;
+    if (!m || !w) return;
+    const panel = w.closest('.panel');
+    const bottom = panel ? panel.getBoundingClientRect().bottom : window.innerHeight;
+    const top = panel ? panel.getBoundingClientRect().top : 0;
+    const r = m.getBoundingClientRect();
+    const chip = w.getBoundingClientRect();
+    if (r.bottom > bottom && chip.top - r.height - 6 >= top) setUp(true);
+    m.querySelector<HTMLElement>('[aria-checked="true"]')?.focus({ preventScroll: true });
   }, [open]);
 
-  const choose = (s: Status) => {
+  // scrolling anything closes the menu
+  useEffect(() => {
+    if (!open) return;
+    const close = () => ui.setStatusFor(null);
+    document.addEventListener('scroll', close, true);
+    return () => document.removeEventListener('scroll', close, true);
+  }, [open, ui]);
+
+  const close = (refocus: boolean) => {
     ui.setStatusFor(null);
-    if (s === a.status) { trigger.current?.focus(); return; }
+    if (refocus) trigger.current?.focus();
+  };
+
+  const choose = (s: Status) => {
+    if (s === a.status) { close(true); return; }
+    ui.setStatusFor(null);
     update((d) => {
       const x = findCourse(d, courseId)?.assignments.find((x) => x.id === a.id);
       if (x) x.status = s;
@@ -210,39 +237,40 @@ function StatusPicker({ a, courseId, small }: { a: Assignment; courseId: string;
   };
 
   const onKey = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') { e.preventDefault(); ui.setStatusFor(null); trigger.current?.focus(); return; }
+    if (e.key === 'Escape' || e.key === 'Tab') { e.preventDefault(); close(true); return; }
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
     e.preventDefault();
     const items = Array.from(menu.current?.querySelectorAll<HTMLElement>('[role="menuitemradio"]') ?? []);
     const i = items.indexOf(document.activeElement as HTMLElement);
-    const n = e.key === 'ArrowDown' ? (i + 1) % items.length : (i - 1 + items.length) % items.length;
-    items[n]?.focus();
+    const n = e.key === 'ArrowDown' ? Math.min(i + 1, items.length - 1) : Math.max(i - 1, 0);
+    items[n]?.focus({ preventScroll: true });
   };
 
-  const size = small ? ' chip-sm' : '';
   return (
-    <div className="status">
+    <div className="status" ref={wrap}>
       <button
         ref={trigger}
-        className={`chip chip-${chipClass(a.status)}${size}`}
+        className={`chip st-${chipClass(a.status)}${small ? ' chip-sm' : ''}`}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label={`status: ${a.status}, tap to change`}
+        aria-label={`status: ${a.status}`}
         onClick={() => ui.setStatusFor(open ? null : a.id)}
       >
         {a.status}
       </button>
       {open && (
-        <div className="status-menu" role="menu" ref={menu} onKeyDown={onKey}>
-          {statusOptions(a.status).map((s) => (
+        <div className={`status-menu${up ? ' up' : ''}`} role="menu" ref={menu} onKeyDown={onKey}>
+          {options.map((s) => (
             <button
               key={s}
               role="menuitemradio"
               aria-checked={s === a.status}
-              className={`chip chip-${chipClass(s)}${size}`}
+              className="status-option"
               onClick={() => choose(s)}
             >
-              {s}
+              <span className={`status-square st-${chipClass(s)}`} aria-hidden="true" />
+              <span className="status-label">{s}</span>
+              {s === a.status && <span className="status-current" aria-hidden="true">←</span>}
             </button>
           ))}
         </div>
