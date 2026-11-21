@@ -179,13 +179,13 @@ export function Onboarding() {
         <div className="acct-content w360 onboard-1">
           <div className="onboard-top">
             <div className="step">1 / 2</div>
-            <SectionHeading>your first quarter</SectionHeading>
+            <SectionHeading>your first term</SectionHeading>
           </div>
           <div className="onboard-name-group">
             <input
               className="onboard-name"
-              placeholder="fall 26"
-              aria-label="quarter name"
+              placeholder="term, year"
+              aria-label="term name"
               autoFocus
               value={name}
               onChange={(e) => setName(e.target.value)}

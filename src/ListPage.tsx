@@ -45,7 +45,7 @@ function QuarterSwitcher({ className }: { className: string }) {
     const id = uid();
     focusKey.current = `quarter:${id}`;
     update((d) => {
-      d.quarters.push({ id, name: 'new quarter', phrase: randomPhrase(), courses: [] });
+      d.quarters.push({ id, name: 'new term', phrase: randomPhrase(), courses: [] });
       d.currentQuarterId = id;
     });
   };
@@ -61,7 +61,7 @@ function QuarterSwitcher({ className }: { className: string }) {
               onChange={actions.rename}
               onDelete={actions.remove}
               focusKey={`quarter:${q.id}`}
-              ariaLabel="quarter name"
+              ariaLabel="term name"
             />]
           </span>
         ) : (
