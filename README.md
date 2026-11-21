@@ -21,7 +21,8 @@ Tomb of Ariel is the title of Volume 7 in Shadow Slave, a web novel by Guiltythr
 - **Finished stuff** (`done!` and `EXAM:)`) folds away into the `finished` list under each class.
 - **Due soon:** dates turn dark when something is due within two days.
 - **Edit or delete:** right-click an assignment on a laptop, or press and hold on a phone.
-- **Rename anything:** click a class name, the term name or the little phrase at the top and just type. Clear a name completely to delete it.
+- **Rename anything:** click a class name, the term name or the little phrase at the top and just type.
+- **Delete a class or term:** hover over it on a laptop and click the `×`, or press and hold it on a phone. Then confirm with `yes`.
 - **New term:** click `+new` next to the term name.
 - **On a phone:** swipe left and right to switch classes.
 

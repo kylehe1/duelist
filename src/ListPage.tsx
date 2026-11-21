@@ -1,8 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useStore } from './store';
 import { useIsDesktop } from './useIsDesktop';
-import { NameInput, ProfileMenu, SiteName, noAuto } from './components';
+import { InlineConfirm, NameInput, ProfileMenu, SiteName, noAuto, useLongPress } from './components';
 import { CourseBody, ListUIProvider, activeCount, useListUI } from './course';
+import type { Course } from './model';
 import { activeOf, compareAssignments, currentQuarter, randomPhrase, uid, type Assignment, type Quarter } from './model';
 
 /* ---------- shared header pieces ---------- */
@@ -11,14 +12,6 @@ function useQuarterActions(q: Quarter) {
   const { update, focusKey } = useStore();
   return {
     rename: (name: string) => update((d) => { const x = d.quarters.find((x) => x.id === q.id); if (x) x.name = name; }),
-    remove: () => update((d) => {
-      const i = d.quarters.findIndex((x) => x.id === q.id);
-      if (i < 0) return;
-      d.quarters.splice(i, 1);
-      if (d.currentQuarterId === q.id || !d.quarters.some((x) => x.id === d.currentQuarterId)) {
-        d.currentQuarterId = d.quarters[Math.max(0, i - 1)]?.id ?? null;
-      }
-    }),
     setPhrase: (phrase: string) => update((d) => { const x = d.quarters.find((x) => x.id === q.id); if (x) x.phrase = phrase; }),
     addClass: () => {
       const id = uid();
@@ -37,10 +30,21 @@ function useQuarterActions(q: Quarter) {
   };
 }
 
-function QuarterSwitcher({ className }: { className: string }) {
+function useQuarterRemover() {
+  const { update } = useStore();
+  return (id: string) => update((d) => {
+    const i = d.quarters.findIndex((x) => x.id === id);
+    if (i < 0) return;
+    d.quarters.splice(i, 1);
+    if (d.currentQuarterId === id || !d.quarters.some((x) => x.id === d.currentQuarterId)) {
+      d.currentQuarterId = d.quarters[Math.max(0, i - 1)]?.id ?? null;
+    }
+  });
+}
+
+function QuarterSwitcher({ className, desktop }: { className: string; desktop: boolean }) {
   const { state, update, focusKey } = useStore();
   const cur = currentQuarter(state)!;
-  const actions = useQuarterActions(cur);
   const addQuarter = () => {
     const id = uid();
     focusKey.current = `quarter:${id}`;
@@ -51,27 +55,81 @@ function QuarterSwitcher({ className }: { className: string }) {
   };
   return (
     <div className={className}>
-      {state.quarters.map((q) =>
-        q.id === cur.id ? (
-          <span key={q.id} className="qs-current">
-            [<NameInput
-              className="qs-input"
-              value={q.name}
-              size={Math.max(q.name.length, 3)}
-              onChange={actions.rename}
-              onDelete={actions.remove}
-              focusKey={`quarter:${q.id}`}
-              ariaLabel="term name"
-            />]
-          </span>
-        ) : (
-          <button key={q.id} className="qs-other" onClick={() => update((d) => { d.currentQuarterId = q.id; })}>
-            {q.name}
-          </button>
-        ),
-      )}
+      {state.quarters.map((q) => (
+        <QuarterItem key={q.id} q={q} current={q.id === cur.id} desktop={desktop} />
+      ))}
       <button className="qs-new" onClick={addQuarter}>+new</button>
     </div>
+  );
+}
+
+function QuarterItem({ q, current, desktop }: { q: Quarter; current: boolean; desktop: boolean }) {
+  const { update } = useStore();
+  const ui = useListUI();
+  const removeQuarter = useQuarterRemover();
+  const { rename } = useQuarterActions(q);
+  const key = `quarter:${q.id}`;
+  const [hover, setHover] = useState(false);
+  const [focusIn, setFocusIn] = useState(false);
+  const longPress = useLongPress(() => ui.setConfirm(key));
+
+  if (ui.confirm === key) {
+    return (
+      <InlineConfirm
+        name={q.name}
+        size={desktop ? 13 : 12}
+        returnFocus={`[data-del="${key}"]`}
+        onYes={() => { ui.setConfirm(null); removeQuarter(q.id); }}
+        onNo={() => ui.setConfirm(null)}
+      />
+    );
+  }
+
+  const bracketed = (
+    <span className="qs-current">
+      [<NameInput
+        className="qs-input"
+        value={q.name}
+        size={Math.max(q.name.length, 3)}
+        onChange={rename}
+        focusKey={key}
+        ariaLabel="term name"
+      />]
+    </span>
+  );
+
+  if (!desktop) {
+    return (
+      <span className="qs-item" {...longPress}>
+        {current ? bracketed : (
+          <button className="qs-other" onClick={() => update((d) => { d.currentQuarterId = q.id; })}>{q.name}</button>
+        )}
+      </span>
+    );
+  }
+  if (!current) {
+    return <button className="qs-other" onClick={() => update((d) => { d.currentQuarterId = q.id; })}>{q.name}</button>;
+  }
+  const shown = hover || focusIn;
+  return (
+    <span
+      className="qs-cur-wrap"
+      onPointerEnter={() => setHover(true)}
+      onPointerLeave={() => setHover(false)}
+      onFocus={(e) => setFocusIn(e.target.matches(':focus-visible') || e.target.tagName === 'INPUT')}
+      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setFocusIn(false); }}
+    >
+      {bracketed}
+      <button
+        className={`qs-del${shown ? ' shown' : ''}`}
+        data-del={key}
+        tabIndex={shown ? 0 : -1}
+        aria-label={`delete term ${q.name}`}
+        onClick={() => ui.setConfirm(key)}
+      >
+        ×
+      </button>
+    </span>
   );
 }
 
@@ -111,24 +169,13 @@ function DesktopList({ q }: { q: Quarter }) {
         </div>
         <div className="d-head-right">
           <ProfileMenu />
-          <QuarterSwitcher className="qs" />
+          <QuarterSwitcher className="qs" desktop />
         </div>
       </header>
       <div className="d-cols">
         {q.courses.map((c) => (
           <section key={c.id} className="d-col">
-            <div className="col-head">
-              <span className="col-mark">##</span>
-              <NameInput
-                className="col-name"
-                value={c.name}
-                onChange={(v) => actions.renameClass(c.id, v)}
-                onDelete={() => actions.removeClass(c.id)}
-                focusKey={`class:${c.id}`}
-                ariaLabel="class name"
-              />
-              <span className="col-count">{activeCount(c)}</span>
-            </div>
+            <DesktopColHead q={q} c={c} />
             <CourseBody course={c} />
           </section>
         ))}
@@ -136,6 +183,53 @@ function DesktopList({ q }: { q: Quarter }) {
           + class
         </button>
       </div>
+    </div>
+  );
+}
+
+function DesktopColHead({ q, c }: { q: Quarter; c: Course }) {
+  const ui = useListUI();
+  const actions = useQuarterActions(q);
+  const key = `class:${c.id}`;
+  const [hover, setHover] = useState(false);
+  const [focusIn, setFocusIn] = useState(false);
+  const shown = hover || focusIn;
+  return (
+    <div
+      className="col-head"
+      data-head={key}
+      onPointerEnter={() => setHover(true)}
+      onPointerLeave={() => setHover(false)}
+      onFocus={(e) => setFocusIn(e.target.matches(':focus-visible') || e.target.tagName === 'INPUT')}
+      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setFocusIn(false); }}
+    >
+      <span className="col-mark">##</span>
+      {ui.confirm === key ? (
+        <InlineConfirm
+          name={c.name}
+          size={12}
+          returnFocus={`[data-head="${key}"] input`}
+          onYes={() => { ui.setConfirm(null); actions.removeClass(c.id); }}
+          onNo={() => ui.setConfirm(null)}
+        />
+      ) : (
+        <>
+          <NameInput
+            className="col-name"
+            value={c.name}
+            onChange={(v) => actions.renameClass(c.id, v)}
+            focusKey={key}
+            ariaLabel="class name"
+          />
+          {shown ? (
+            <button className="col-del" data-del={key} aria-label={`delete class ${c.name}`} onClick={() => ui.setConfirm(key)}>
+              ×
+            </button>
+          ) : (
+            <span className="col-count">{activeCount(c)}</span>
+          )}
+        </>
+      )}
     </div>
   );
 }
@@ -196,7 +290,7 @@ function MobileList({ q }: { q: Quarter }) {
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
-    if (ui.form) return;
+    if (ui.form || ui.confirm) return;
     if ((e.target as Element).closest('input, textarea, select')) return;
     drag.current = { id: e.pointerId, x0: e.clientX, y0: e.clientY, mode: 'pending', dx: 0, samples: [{ x: e.clientX, t: e.timeStamp }] };
   };
@@ -249,6 +343,13 @@ function MobileList({ q }: { q: Quarter }) {
     actions.addClass();
     setIndex(q.courses.length);
   };
+  const removeClass = (i: number) => {
+    const id = q.courses[i]?.id;
+    if (!id) return;
+    ui.setConfirm(null);
+    if (i < idx || (i === idx && i > 0)) setIndex(idx - 1);
+    actions.removeClass(id);
+  };
 
   return (
     <div className="m frame-m-list">
@@ -258,14 +359,12 @@ function MobileList({ q }: { q: Quarter }) {
           <ProfileMenu />
         </div>
         <div className="m-sub">
-          <QuarterSwitcher className="qs" />
+          <QuarterSwitcher className="qs" desktop={false} />
           <PhraseRow q={q} />
         </div>
         <div className="tabs" ref={tabs}>
           {q.courses.map((c, i) => (
-            <button key={c.id} className={`tab${i === idx ? ' active' : ''}`} onClick={() => setIndex(i)}>
-              {c.name}
-            </button>
+            <ClassTab key={c.id} c={c} active={i === idx} onSelect={() => setIndex(i)} onDelete={() => removeClass(i)} />
           ))}
           <button className="tab tab-add" onClick={addClass}>+ class</button>
         </div>
@@ -283,23 +382,54 @@ function MobileList({ q }: { q: Quarter }) {
         <div className="track" ref={track}>
           {q.courses.map((c, i) => (
             <section key={c.id} className="panel" inert={i !== idx}>
-              <div className="panel-title">
-                <span className="panel-mark">##</span>
-                <NameInput
-                  className="panel-name"
-                  value={c.name}
-                  onChange={(v) => actions.renameClass(c.id, v)}
-                  onDelete={() => actions.removeClass(c.id)}
-                  focusKey={`class:${c.id}`}
-                  ariaLabel="class name"
-                />
-                <span className="panel-count">{activeCount(c)} open</span>
-              </div>
+              <PanelTitle q={q} c={c} onDelete={() => removeClass(i)} />
               <CourseBody course={c} />
             </section>
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function ClassTab({ c, active, onSelect, onDelete }: { c: Course; active: boolean; onSelect: () => void; onDelete: () => void }) {
+  const ui = useListUI();
+  const key = `tab:${c.id}`;
+  const longPress = useLongPress(() => ui.setConfirm(key));
+  if (ui.confirm === key) {
+    return <InlineConfirm name={c.name} size={12} onYes={onDelete} onNo={() => ui.setConfirm(null)} />;
+  }
+  return (
+    <button className={`tab${active ? ' active' : ''}`} onClick={onSelect} {...longPress}>
+      {c.name}
+    </button>
+  );
+}
+
+function PanelTitle({ q, c, onDelete }: { q: Quarter; c: Course; onDelete: () => void }) {
+  const ui = useListUI();
+  const actions = useQuarterActions(q);
+  const key = `title:${c.id}`;
+  const longPress = useLongPress(() => ui.setConfirm(key));
+  return (
+    <div className="panel-title">
+      <span className="panel-mark">##</span>
+      {ui.confirm === key ? (
+        <InlineConfirm name={c.name} size={12} onYes={onDelete} onNo={() => ui.setConfirm(null)} />
+      ) : (
+        <>
+          <span className="panel-name-wrap" {...longPress}>
+            <NameInput
+              className="panel-name"
+              value={c.name}
+              onChange={(v) => actions.renameClass(c.id, v)}
+              focusKey={`class:${c.id}`}
+              ariaLabel="class name"
+            />
+          </span>
+          <span className="panel-count">{activeCount(c)} open</span>
+        </>
+      )}
     </div>
   );
 }

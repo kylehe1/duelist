@@ -17,6 +17,9 @@ interface ListUI {
   setActionFor: (id: string | null) => void;
   statusFor: string | null;
   setStatusFor: (id: string | null) => void;
+  /** which delete confirm is open, e.g. "quarter:<id>", "tab:<id>", "title:<id>", "class:<id>" */
+  confirm: string | null;
+  setConfirm: (key: string | null) => void;
   finishedOpen: Set<string>;
   toggleFinished: (courseId: string) => void;
 }
@@ -27,6 +30,7 @@ export function ListUIProvider({ children }: { children: React.ReactNode }) {
   const [form, setFormState] = useState<FormTarget | null>(null);
   const [actionFor, setActionForState] = useState<string | null>(null);
   const [statusFor, setStatusForState] = useState<string | null>(null);
+  const [confirm, setConfirm] = useState<string | null>(null);
   const setActionFor = (id: string | null) => { setActionForState(id); setStatusForState(null); };
   const setStatusFor = (id: string | null) => { setStatusForState(id); setActionForState(null); };
   const [finishedOpen, setFinishedOpen] = useState<Set<string>>(() => new Set());
@@ -61,6 +65,8 @@ export function ListUIProvider({ children }: { children: React.ReactNode }) {
     setActionFor,
     statusFor,
     setStatusFor,
+    confirm,
+    setConfirm,
     finishedOpen,
     toggleFinished: (id) =>
       setFinishedOpen((s) => {

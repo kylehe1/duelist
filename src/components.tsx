@@ -99,13 +99,12 @@ export function ProfileMenu() {
 export function NameInput(props: {
   value: string;
   onChange: (v: string) => void;
-  onDelete: () => void;
   focusKey: string;
   className: string;
   ariaLabel: string;
   size?: number;
 }) {
-  const { value, onChange, onDelete, focusKey, className, ariaLabel, size } = props;
+  const { value, onChange, focusKey, className, ariaLabel, size } = props;
   const store = useStore();
   const ref = useRef<HTMLInputElement>(null);
   const orig = useRef(value);
@@ -129,11 +128,105 @@ export function NameInput(props: {
       onFocus={() => { orig.current = value; }}
       onChange={(e) => onChange(e.target.value)}
       onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
-      onBlur={() => {
-        if (value.trim() !== '') return;
-        if (window.confirm(`delete ${orig.current}?`)) onDelete();
-        else onChange(orig.current);
-      }}
+      onBlur={() => { if (value.trim() === '') onChange(orig.current); }}
     />
   );
+}
+
+/* §11a inline delete confirm: "delete <name>? yes no", in place of the item */
+export function InlineConfirm({ name, onYes, onNo, size, returnFocus }: {
+  name: string;
+  onYes: () => void;
+  onNo: () => void;
+  size: number;
+  /** selector of the element to refocus after a keyboard cancel */
+  returnFocus?: string;
+}) {
+  const box = useRef<HTMLSpanElement>(null);
+  const yes = useRef<HTMLButtonElement>(null);
+  const no = useRef<HTMLButtonElement>(null);
+  const mountedAt = useRef(0);
+  const cbs = useRef({ onNo });
+  cbs.current.onNo = onNo;
+
+  const cancel = (refocus: boolean) => {
+    cbs.current.onNo();
+    if (refocus && returnFocus) {
+      requestAnimationFrame(() => document.querySelector<HTMLElement>(returnFocus)?.focus({ preventScroll: true }));
+    }
+  };
+
+  useEffect(() => {
+    mountedAt.current = performance.now();
+    no.current?.focus({ preventScroll: true });
+    const timer = window.setTimeout(() => cbs.current.onNo(), 5000);
+    const onDown = (e: PointerEvent) => { if (!box.current?.contains(e.target as Node)) cbs.current.onNo(); };
+    const onScroll = () => cbs.current.onNo();
+    document.addEventListener('pointerdown', onDown);
+    document.addEventListener('scroll', onScroll, true);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('pointerdown', onDown);
+      document.removeEventListener('scroll', onScroll, true);
+    };
+  }, []);
+
+  const onKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cancel(true); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); yes.current?.focus(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); no.current?.focus(); }
+  };
+
+  return (
+    <span className="confirm" style={{ fontSize: size }} ref={box} onKeyDown={onKey}>
+      <span className="confirm-q">delete {name}?</span>
+      <button
+        ref={yes}
+        className="confirm-yes"
+        onClick={() => { if (performance.now() - mountedAt.current > 300) onYes(); }}
+      >
+        yes
+      </button>
+      <button ref={no} className="confirm-no" onClick={() => cancel(true)}>no</button>
+    </span>
+  );
+}
+
+/* touch long-press (500ms). Cancels on >8px movement or early lift; swallows the tap that follows. */
+export function useLongPress(onFire: () => void) {
+  const timer = useRef<number | null>(null);
+  const start = useRef<{ x: number; y: number } | null>(null);
+  const fired = useRef(false);
+  const fire = useRef(onFire);
+  fire.current = onFire;
+  const cancel = () => {
+    if (timer.current != null) clearTimeout(timer.current);
+    timer.current = null;
+    start.current = null;
+  };
+  useEffect(() => cancel, []);
+  return {
+    onPointerDown: (e: React.PointerEvent) => {
+      if (e.pointerType === 'mouse') return;
+      fired.current = false;
+      start.current = { x: e.clientX, y: e.clientY };
+      timer.current = window.setTimeout(() => {
+        timer.current = null;
+        fired.current = true;
+        try { navigator.vibrate?.(10); } catch { /* unsupported */ }
+        fire.current();
+      }, 500);
+    },
+    onPointerMove: (e: React.PointerEvent) => {
+      const s = start.current;
+      if (s && Math.hypot(e.clientX - s.x, e.clientY - s.y) > 8) cancel();
+    },
+    onPointerUp: cancel,
+    onPointerCancel: cancel,
+    onTouchEnd: (e: React.TouchEvent) => { if (fired.current) e.preventDefault(); },
+    onClickCapture: (e: React.MouseEvent) => {
+      if (fired.current) { fired.current = false; e.preventDefault(); e.stopPropagation(); }
+    },
+    onContextMenu: (e: React.MouseEvent) => e.preventDefault(),
+  };
 }

@@ -272,3 +272,21 @@ input:focus-visible{outline:none}
 .setting-link{font-family:var(--sans);font-size:13px;color:var(--ink);text-decoration:underline;
   text-decoration-color:var(--line);text-underline-offset:3px;white-space:nowrap}
 .m .setting-link{font-size:14px}
+
+/* §11a inline delete confirm */
+.confirm{display:inline-flex;align-items:baseline;gap:10px;white-space:nowrap;font-family:var(--mono)}
+.confirm-q{color:var(--ink);font-weight:400}
+.confirm-yes{color:var(--error);font-weight:500}
+.confirm-yes:hover{text-decoration:underline}
+.confirm-no{color:var(--muted);font-weight:400}
+.confirm-no:hover{color:var(--ink)}
+.m .confirm button{min-height:44px;padding:0 4px;display:inline-flex;align-items:center;margin:-13px -4px}
+.qs-cur-wrap{display:inline-flex;align-items:baseline}
+.qs-del{margin-left:6px;font-family:var(--mono);font-size:13px;color:var(--muted);opacity:0;transition:opacity 120ms}
+.qs-del.shown{opacity:1}
+.qs-del:hover{color:var(--ink)}
+.col-del{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.col-del:hover{color:var(--ink)}
+.qs-item,.tab,.panel-name-wrap{-webkit-touch-callout:none}
+.qs-item .qs-other,.tab{-webkit-user-select:none;user-select:none}
+.panel-name-wrap{display:flex;flex:1;min-width:0}
