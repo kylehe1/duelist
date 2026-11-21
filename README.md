@@ -1,36 +1,30 @@
 # tomb of ariel
 
-A small homework tracker. One column per class, each assignment gets a date and a status, and that's about it. Works on a laptop and a phone.
+A small homework tracker. One column per class, each assignment gets a date and a status, and that's about it.
 
-Built with Vite, React, TypeScript and Supabase. Hosted on Vercel.
+**Open it at [tombofariel.vercel.app](https://tombofariel.vercel.app)**
 
 ## The name
 
 Tomb of Ariel is the title of Volume 7 in Shadow Slave, a web novel by Guiltythree. It's my favorite arc, so now my homework lives in a tomb. Naturally.
 
-## Running it locally
+## Getting started
 
-1. Create a Supabase project.
-2. Run `supabase/schema.sql` in the SQL Editor.
-3. In Authentication settings, turn off "Confirm email".
-4. Copy `.env.example` to `.env` and fill in your project URL and anon key.
-5. Install and start:
+1. Make an account with a username and password. There is no password recovery, so don't forget it!
+2. Name your quarter/semester and add your classes.
+3. Good job.
 
-```bash
-npm install
-npm run dev
-```
+## How to use it
 
-To try it on your phone, run `npm run dev -- --host` and open the Network address on the same Wi-Fi.
+- **Add homework:** click `+ add` under a class, type a name, pick a date. The time is optional.
+- **Change status:** tap the label on the right to cycle through `planned`, `working..`, `done!`, `EXAM!!` and `EXAM:)`.
+- **Finished stuff** (`done!` and `EXAM:)`) folds away into the `finished` list under each class.
+- **Due soon:** dates turn dark when something is due within two days.
+- **Edit or delete:** right-click an assignment on a laptop, or press and hold on a phone.
+- **Rename anything:** click a class name, the quarter name or the little phrase at the top and just type. Clear a name completely to delete it.
+- **New quarter:** click `+new` next to the quarter name.
+- **On a phone:** swipe left and right to switch classes.
 
-## Deploying
+## Put it on your phone
 
-Import the repo into Vercel and add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as environment variables. Every push to `main` redeploys.
-
-## How accounts work
-
-Accounts are username and password only. Supabase needs an email, so the app signs you up as `username@tomb.local` behind the scenes. Supabase also requires 6 character passwords, so the app adds a fixed suffix to whatever you type. There is no password recovery, so don't forget it.
-
-## How data is stored
-
-Everything for one user lives in a single JSON row in the `app_state` table. The app keeps a copy in localStorage so it opens instantly, then syncs with Supabase in the background.
+Open the site in Safari, tap Share, then **Add to Home Screen**. It opens like a normal app.
