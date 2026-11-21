@@ -6,3 +6,7 @@ export const supabase = createClient(
 );
 
 export const emailFor = (username: string) => `${username}@tomb.local`;
+
+/* Supabase requires ≥6-char passwords; the app allows 3. Pad before every auth call. */
+export const MIN_PASSWORD = 3;
+export const authPassword = (p: string) => `${p}~tomb`;

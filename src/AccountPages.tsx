@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { supabase, emailFor } from './supabase';
+import { supabase, emailFor, authPassword, MIN_PASSWORD } from './supabase';
 import { usernameOf, useSession } from './auth';
 import { useStore } from './store';
 import { useIsDesktop } from './useIsDesktop';
@@ -80,23 +80,23 @@ export function LoginPage() {
   const submit = async () => {
     if (busy) return;
     if (!USERNAME_RE.test(username)) return setError('username: 3–24 letters, numbers, _ or .');
-    if (password.length < 6) return setError('password: at least 6 characters');
+    if (password.length < MIN_PASSWORD) return setError(`password: at least ${MIN_PASSWORD} characters`);
     if (creating && password !== confirm) return setError("passwords don't match");
     setBusy(true);
     const email = emailFor(username);
     if (creating) {
-      const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { username } } });
+      const { data, error } = await supabase.auth.signUp({ email, password: authPassword(password), options: { data: { username } } });
       if (error) {
         setBusy(false);
         setError(/already registered|already exists/i.test(error.message) ? 'username taken' : error.message);
         return;
       }
       if (!data.session) {
-        const r = await supabase.auth.signInWithPassword({ email, password });
+        const r = await supabase.auth.signInWithPassword({ email, password: authPassword(password) });
         if (r.error) { setBusy(false); setError(r.error.message); return; }
       }
     } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({ email, password: authPassword(password) });
       if (error) { setBusy(false); setError('wrong username or password'); return; }
     }
     navigate('/', { replace: true });
@@ -297,15 +297,15 @@ export function ResetPasswordPage() {
 
   const save = async () => {
     if (busy) return;
-    if (next.length < 6) return setMsg({ kind: 'error', text: 'password: at least 6 characters' });
+    if (next.length < MIN_PASSWORD) return setMsg({ kind: 'error', text: `password: at least ${MIN_PASSWORD} characters` });
     if (next !== confirm) return setMsg({ kind: 'error', text: "passwords don't match" });
     setBusy(true);
-    const check = await supabase.auth.signInWithPassword({ email: emailFor(usernameOf(session)), password: current });
+    const check = await supabase.auth.signInWithPassword({ email: emailFor(usernameOf(session)), password: authPassword(current) });
     if (check.error) {
       setBusy(false);
       return setMsg({ kind: 'error', text: 'current password is wrong' });
     }
-    const { error } = await supabase.auth.updateUser({ password: next });
+    const { error } = await supabase.auth.updateUser({ password: authPassword(next) });
     setBusy(false);
     if (error) return setMsg({ kind: 'error', text: error.message });
     setCurrent('');
