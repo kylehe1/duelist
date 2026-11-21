@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from './supabase';
 import { usernameOf, useSession } from './auth';
 import { useStore } from './store';
-import { chipClass, type Status } from './model';
 
 export const noAuto = { autoCapitalize: 'off', autoCorrect: 'off', spellCheck: false } as const;
 
@@ -136,17 +135,5 @@ export function NameInput(props: {
         else onChange(orig.current);
       }}
     />
-  );
-}
-
-export function Chip({ status, onCycle, small }: { status: Status; onCycle: () => void; small?: boolean }) {
-  return (
-    <button
-      className={`chip chip-${chipClass(status)}${small ? ' chip-sm' : ''}`}
-      aria-label={`status: ${status}, tap to change`}
-      onClick={onCycle}
-    >
-      {status}
-    </button>
   );
 }

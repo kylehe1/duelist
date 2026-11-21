@@ -111,6 +111,13 @@ input:focus-visible{outline:none}
 .action-delete{color:var(--error)}
 .m .actions button{min-height:32px}
 
+/* status dropdown */
+.status{position:relative;flex:none}
+.status-menu{position:absolute;top:calc(100% + 6px);right:0;z-index:10;display:flex;flex-direction:column;align-items:flex-end;gap:6px;
+  padding:8px;background:var(--surface);border:1px solid var(--line);border-radius:6px;box-shadow:0 8px 28px rgba(31,30,28,.10)}
+.status-menu .chip[aria-checked="true"]{outline:1px solid var(--ink);outline-offset:2px}
+.kind-toggle{margin-left:auto}
+
 /* ---------- empty / add / finished ---------- */
 .empty{font-size:13px;color:var(--muted-2);padding:14px 0}
 .m .empty{font-size:14px;padding:16px 0}

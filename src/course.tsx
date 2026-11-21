@@ -1,10 +1,10 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useStore } from './store';
-import { Chip, noAuto } from './components';
+import { noAuto } from './components';
 import {
-  activeOf, finishedOf, formatDate, formatTime, isDueSoon, isFinished, nextStatus, parseDateInput,
-  parseTimeInput, toDateInput, toTimeInput, uid,
-  type AppState, type Assignment, type Course,
+  activeOf, chipClass, convertStatus, finishedOf, formatDate, formatTime, isDueSoon, isExam, isFinished,
+  parseDateInput, parseTimeInput, statusOptions, toDateInput, toTimeInput, uid,
+  type AppState, type Assignment, type Course, type Status,
 } from './model';
 
 /* ---------- list-wide UI state: one add/edit form, one action strip ---------- */
@@ -15,6 +15,8 @@ interface ListUI {
   setForm: (f: FormTarget | null) => void;
   actionFor: string | null;
   setActionFor: (id: string | null) => void;
+  statusFor: string | null;
+  setStatusFor: (id: string | null) => void;
   finishedOpen: Set<string>;
   toggleFinished: (courseId: string) => void;
 }
@@ -23,7 +25,10 @@ export const useListUI = () => useContext(ListUICtx)!;
 
 export function ListUIProvider({ children }: { children: React.ReactNode }) {
   const [form, setFormState] = useState<FormTarget | null>(null);
-  const [actionFor, setActionFor] = useState<string | null>(null);
+  const [actionFor, setActionForState] = useState<string | null>(null);
+  const [statusFor, setStatusForState] = useState<string | null>(null);
+  const setActionFor = (id: string | null) => { setActionForState(id); setStatusForState(null); };
+  const setStatusFor = (id: string | null) => { setStatusForState(id); setActionForState(null); };
   const [finishedOpen, setFinishedOpen] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
@@ -40,11 +45,22 @@ export function ListUIProvider({ children }: { children: React.ReactNode }) {
     };
   }, [actionFor]);
 
+  useEffect(() => {
+    if (!statusFor) return;
+    const onDown = (e: PointerEvent) => {
+      if (!(e.target as Element).closest?.('.status')) setStatusForState(null);
+    };
+    document.addEventListener('pointerdown', onDown);
+    return () => document.removeEventListener('pointerdown', onDown);
+  }, [statusFor]);
+
   const ui: ListUI = {
     form,
     setForm: (f) => { setFormState(f); setActionFor(null); },
     actionFor,
     setActionFor,
+    statusFor,
+    setStatusFor,
     finishedOpen,
     toggleFinished: (id) =>
       setFinishedOpen((s) => {
@@ -75,7 +91,7 @@ function tomorrowInput() {
   return toDateInput(t.getFullYear(), t.getMonth() + 1, t.getDate());
 }
 
-interface FormValues { name: string; year: number; month: number; day: number; time: number | null; }
+interface FormValues { name: string; year: number; month: number; day: number; time: number | null; exam: boolean; }
 
 function AddForm({ initial, submitLabel, onSubmit, onCancel }: {
   initial?: Assignment;
@@ -88,13 +104,14 @@ function AddForm({ initial, submitLabel, onSubmit, onCancel }: {
     initial ? toDateInput(initial.year, initial.month, initial.day) : lastDate ?? tomorrowInput(),
   );
   const [time, setTime] = useState(initial ? toTimeInput(initial.time) : '');
+  const [exam, setExam] = useState(initial ? isExam(initial.status) : false);
 
   const submit = () => {
     const n = name.trim();
     const d = parseDateInput(date);
     if (!n || !d) return;
     lastDate = date;
-    onSubmit({ name: n, ...d, time: parseTimeInput(time) });
+    onSubmit({ name: n, ...d, time: parseTimeInput(time), exam });
   };
 
   return (
@@ -121,6 +138,15 @@ function AddForm({ initial, submitLabel, onSubmit, onCancel }: {
       <div className="addform-buttons">
         <button className="addform-submit" onClick={submit}>{submitLabel}</button>
         <button className="addform-cancel" onClick={onCancel}>cancel</button>
+        <button
+          type="button"
+          className={`chip ${exam ? 'chip-exam' : 'chip-planned'} kind-toggle`}
+          aria-pressed={exam}
+          aria-label={exam ? 'type: exam, tap to make it an assignment' : 'type: assignment, tap to make it an exam'}
+          onClick={() => setExam((e) => !e)}
+        >
+          {exam ? 'exam' : 'assignment'}
+        </button>
       </div>
     </div>
   );
@@ -163,15 +189,73 @@ function ActionStrip({ onEdit, onDelete }: { onEdit: () => void; onDelete: () =>
   );
 }
 
+function StatusPicker({ a, courseId, small }: { a: Assignment; courseId: string; small?: boolean }) {
+  const { update } = useStore();
+  const ui = useListUI();
+  const open = ui.statusFor === a.id;
+  const trigger = useRef<HTMLButtonElement>(null);
+  const menu = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (open) menu.current?.querySelector<HTMLElement>('[aria-checked="true"]')?.focus();
+  }, [open]);
+
+  const choose = (s: Status) => {
+    ui.setStatusFor(null);
+    if (s === a.status) { trigger.current?.focus(); return; }
+    update((d) => {
+      const x = findCourse(d, courseId)?.assignments.find((x) => x.id === a.id);
+      if (x) x.status = s;
+    });
+  };
+
+  const onKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') { e.preventDefault(); ui.setStatusFor(null); trigger.current?.focus(); return; }
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    e.preventDefault();
+    const items = Array.from(menu.current?.querySelectorAll<HTMLElement>('[role="menuitemradio"]') ?? []);
+    const i = items.indexOf(document.activeElement as HTMLElement);
+    const n = e.key === 'ArrowDown' ? (i + 1) % items.length : (i - 1 + items.length) % items.length;
+    items[n]?.focus();
+  };
+
+  const size = small ? ' chip-sm' : '';
+  return (
+    <div className="status">
+      <button
+        ref={trigger}
+        className={`chip chip-${chipClass(a.status)}${size}`}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={`status: ${a.status}, tap to change`}
+        onClick={() => ui.setStatusFor(open ? null : a.id)}
+      >
+        {a.status}
+      </button>
+      {open && (
+        <div className="status-menu" role="menu" ref={menu} onKeyDown={onKey}>
+          {statusOptions(a.status).map((s) => (
+            <button
+              key={s}
+              role="menuitemradio"
+              aria-checked={s === a.status}
+              className={`chip chip-${chipClass(s)}${size}`}
+              onClick={() => choose(s)}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AssignmentRow({ a, courseId, finished }: { a: Assignment; courseId: string; finished?: boolean }) {
   const { update } = useStore();
   const ui = useListUI();
   const handlers = useRowActions(a.id);
 
-  const cycle = () => update((d) => {
-    const x = findCourse(d, courseId)?.assignments.find((x) => x.id === a.id);
-    if (x) x.status = nextStatus(x.status);
-  });
   const remove = () => {
     ui.setActionFor(null);
     update((d) => {
@@ -181,7 +265,7 @@ function AssignmentRow({ a, courseId, finished }: { a: Assignment; courseId: str
   };
   const right = ui.actionFor === a.id
     ? <ActionStrip onEdit={() => ui.setForm({ courseId, editId: a.id })} onDelete={remove} />
-    : <Chip status={a.status} onCycle={cycle} small={finished} />;
+    : <StatusPicker a={a} courseId={courseId} small={finished} />;
 
   if (finished) {
     return (
@@ -227,7 +311,10 @@ export function CourseBody({ course }: { course: Course }) {
       onSubmit={(v) => {
         update((d) => {
           const x = findCourse(d, course.id)?.assignments.find((x) => x.id === a.id);
-          if (x) Object.assign(x, v);
+          if (!x) return;
+          const { exam, ...rest } = v;
+          Object.assign(x, rest);
+          x.status = convertStatus(x.status, exam);
         });
         ui.setForm(null);
       }}
@@ -237,7 +324,8 @@ export function CourseBody({ course }: { course: Course }) {
     form?.editId === a.id ? editForm(a) : <AssignmentRow key={a.id} a={a} courseId={course.id} finished={isDone} />;
 
   const addNew = (v: FormValues) => {
-    const item: Assignment = { id: uid(), status: 'planned', createdAt: Date.now(), ...v };
+    const { exam, ...rest } = v;
+    const item: Assignment = { id: uid(), status: exam ? 'EXAM!!' : 'planned', createdAt: Date.now(), ...rest };
     update((d) => { findCourse(d, course.id)?.assignments.push(item); });
     ui.setForm(null);
   };
