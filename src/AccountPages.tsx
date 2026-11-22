@@ -234,6 +234,7 @@ export function Onboarding() {
                 }}
                 {...noAuto}
               />
+              <span className="class-hint" aria-hidden="true">{r.name === '' && rows.length > 1 ? '⌫' : '↵'}</span>
             </div>
           ))}
         </div>
