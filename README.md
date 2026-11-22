@@ -2,7 +2,7 @@
 
 A small homework tracker. One column per class, each assignment gets a date and a status, and that's about it.
 
-**Open it at [tombofariel.vercel.app](https://tombofariel.vercel.app)**
+**Open it at [duelist4.vercel.app](https://duelist4.vercel.app)**
 
 ## Getting started
 
