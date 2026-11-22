@@ -231,6 +231,9 @@ export function Onboarding() {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
+                    if (r.name.trim() === '') return; // at most one empty line: fill this one first
+                    const empty = rows.find((x) => x.name.trim() === '');
+                    if (empty) { rowRefs.current.get(empty.id)?.focus(); return; }
                     const nr = { id: uid(), name: '' };
                     focusRow.current = nr.id;
                     setRows([...rows.slice(0, i + 1), nr, ...rows.slice(i + 1)]);
@@ -242,7 +245,7 @@ export function Onboarding() {
                 }}
                 {...noAuto}
               />
-              <span className="class-hint" aria-hidden="true">{r.name === '' && rows.length > 1 ? <BackspaceIcon /> : '↵'}</span>
+              <span className="class-hint" aria-hidden="true">{r.name.trim() === '' ? (rows.length > 1 ? <BackspaceIcon /> : null) : '↵'}</span>
             </div>
           ))}
         </div>
