@@ -36,10 +36,11 @@ function writeCache(userId: string, c: Cache) {
   try { localStorage.setItem(cacheKey(userId), JSON.stringify(c)); } catch { /* storage unavailable */ }
 }
 
-export function StoreProvider({ userId, children }: { userId: string; children: ReactNode }) {
-  const initial = useMemo(() => readCache(userId), [userId]);
+/** demo: a test account that never loads or saves. Every visit starts empty, so it always lands on onboarding. */
+export function StoreProvider({ userId, demo, children }: { userId: string; demo: boolean; children: ReactNode }) {
+  const initial = useMemo(() => (demo ? null : readCache(userId)), [userId, demo]);
   const [state, setState] = useState<AppState>(() => initial?.data ?? emptyState());
-  const [ready, setReady] = useState(initial != null);
+  const [ready, setReady] = useState(demo || initial != null);
 
   const updatedAt = useRef(initial?.updatedAt ?? '');
   const latest = useRef(state);
@@ -94,13 +95,15 @@ export function StoreProvider({ userId, children }: { userId: string; children: 
   useEffect(() => {
     if (!localChange.current) return;
     localChange.current = false;
+    if (demo) return;
     updatedAt.current = new Date().toISOString();
     writeCache(userId, { data: state, updatedAt: updatedAt.current });
     if (timer.current != null) clearTimeout(timer.current);
     timer.current = window.setTimeout(() => { void push(); }, 500);
-  }, [state, userId, push]);
+  }, [state, userId, push, demo]);
 
   useEffect(() => {
+    if (demo) return;
     void pull();
     const onFocus = () => { void pull(); };
     const onVis = () => { if (document.visibilityState === 'hidden') void flush(); };
@@ -110,7 +113,7 @@ export function StoreProvider({ userId, children }: { userId: string; children: 
       window.removeEventListener('focus', onFocus);
       document.removeEventListener('visibilitychange', onVis);
     };
-  }, [pull, flush]);
+  }, [pull, flush, demo]);
 
 
   const value = useMemo(() => ({ state, ready, update, flush, focusKey }), [state, ready, update, flush]);

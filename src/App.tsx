@@ -1,16 +1,23 @@
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import type { ReactNode } from 'react';
-import { AuthProvider, useSession } from './auth';
+import { AuthProvider, useSession, usernameOf } from './auth';
 import { StoreProvider, useStore } from './store';
 import { ListPage } from './ListPage';
 import { HelpPage } from './HelpPage';
 import { Bare, LoginPage, Onboarding, ResetPasswordPage, SettingsPage } from './AccountPages';
 
+// log in as demo / demo to test onboarding; nothing it does is ever saved
+const DEMO_USERNAME = 'demo';
+
 function SignedIn() {
   const session = useSession();
   if (session === undefined) return <Bare />;
   if (!session) return <Navigate to="/login" replace />;
-  return <StoreProvider key={session.user.id} userId={session.user.id}><Outlet /></StoreProvider>;
+  return (
+    <StoreProvider key={session.user.id} userId={session.user.id} demo={usernameOf(session) === DEMO_USERNAME}>
+      <Outlet />
+    </StoreProvider>
+  );
 }
 
 function SignedOut({ children }: { children: ReactNode }) {
