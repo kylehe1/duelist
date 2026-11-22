@@ -291,10 +291,11 @@ input:focus-visible{outline:none}
 /* 12b: rows open the edit form */
 .row,.frow{cursor:pointer;position:relative}
 .row-right{position:relative;flex:none;display:flex;align-items:center}
-.row-edit{position:absolute;right:calc(100% + 14px);font-family:var(--mono);font-size:12px;color:var(--muted);opacity:0}
+/* in the flow (not floating) so long names wrap before it instead of running under it */
+.row-edit{margin-right:14px;font-family:var(--mono);font-size:12px;color:var(--muted);opacity:0}
 .d .row:hover .row-edit,.d .frow:hover .row-edit,.row-edit:focus-visible{opacity:1}
 .d .row:hover::before,.d .frow:hover::before{content:'';position:absolute;inset:0 -8px;background:var(--surface);z-index:-1}
-.m .row-edit{width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.m .row-edit{position:absolute;margin:0;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 
 /* 12b: type switch + edit form buttons */
 .type-switch{display:flex;gap:14px;align-items:center;min-height:24px;font-family:var(--mono);font-size:12px}
