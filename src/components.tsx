@@ -6,7 +6,7 @@ import { useStore } from './store';
 
 export const noAuto = { autoCapitalize: 'off', autoCorrect: 'off', spellCheck: false } as const;
 
-export const SiteName = () => <div className="site-name">duelist4</div>;
+export const SiteName = () => <div className="site-name">duelist</div>;
 
 export function SectionHeading({ children }: { children: ReactNode }) {
   return (

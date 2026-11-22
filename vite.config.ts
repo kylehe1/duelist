@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
       manifest: {
-        name: 'duelist4',
-        short_name: 'duelist4',
+        name: 'duelist',
+        short_name: 'duelist',
         display: 'standalone',
         background_color: '#efede8',
         theme_color: '#efede8',

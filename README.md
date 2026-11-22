@@ -1,8 +1,8 @@
-# duelist4
+# duelist
 
 A small homework tracker. One column per class, each assignment gets a date and a status, and that's about it.
 
-**Open it at [duelist4.vercel.app](https://duelist4.vercel.app)**
+**Open it at [duelist44.vercel.app](https://duelist44.vercel.app)**
 
 ## Getting started
 
