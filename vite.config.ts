@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
       manifest: {
-        name: 'tomb of ariel',
-        short_name: 'tomb of ariel',
+        name: 'duelist4',
+        short_name: 'duelist4',
         display: 'standalone',
         background_color: '#efede8',
         theme_color: '#efede8',

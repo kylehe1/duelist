@@ -1,0 +1,20 @@
+add:
+
+username to the left of profile icon
+way to delete assignments
+    - in general a way to edit assignments after creation
+a short info page on how to use, split by desktop and mobile
+    - explains the little stuff, like:
+    - how to add class
+    - how to add term
+    - how to delete
+    - how to reset password
+    - how to switch from planned to working to done / exam!! to exam:)
+        - also shortly describe what each of these mean
+    - anything else you think is worth putting
+    - throw in a fun fact/extra/stats for ners whatever u want to title that shows color scheme
+        - include small display of color followed by - #hexcode
+
+question for claude code:
+    - what happens after too many tabs? does it wrap? or overflow? desktop vs mobile?
+    - think of more edge casess

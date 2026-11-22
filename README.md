@@ -1,12 +1,8 @@
-# tomb of ariel
+# duelist4
 
 A small homework tracker. One column per class, each assignment gets a date and a status, and that's about it.
 
 **Open it at [tombofariel.vercel.app](https://tombofariel.vercel.app)**
-
-## The name
-
-Tomb of Ariel is the title of Volume 7 in Shadow Slave, a web novel by Guiltythree. It's my favorite arc, so now my homework lives in a tomb. Naturally.
 
 ## Getting started
 
