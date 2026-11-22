@@ -73,7 +73,9 @@ input:focus-visible{outline:none}
 
 /* ---------- §5.2 desktop columns ---------- */
 .d-cols{margin-top:104px;display:flex;gap:48px;align-items:flex-start}
-.d-col{flex:1 1 0;min-width:0}
+/* columns wrap to a new row below 200px; auto-fit keeps every column the same width in every row */
+.d-grid{flex:1;min-width:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:56px 48px;align-items:start}
+.d-col{min-width:0}
 .d-add-class{font-family:var(--sans);font-size:13px;color:var(--muted-2);white-space:nowrap;padding-top:2px;flex:none;
   opacity:0;transition:opacity 150ms}
 .d-cols:hover .d-add-class,.d-add-class:focus-visible,.d-add-class.always{opacity:1}

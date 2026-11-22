@@ -173,12 +173,16 @@ function DesktopList({ q }: { q: Quarter }) {
         </div>
       </header>
       <div className="d-cols">
-        {q.courses.map((c) => (
-          <section key={c.id} className="d-col">
-            <DesktopColHead q={q} c={c} />
-            <CourseBody course={c} />
-          </section>
-        ))}
+        {q.courses.length > 0 && (
+          <div className="d-grid">
+            {q.courses.map((c) => (
+              <section key={c.id} className="d-col">
+                <DesktopColHead q={q} c={c} />
+                <CourseBody course={c} />
+              </section>
+            ))}
+          </div>
+        )}
         <button className={`d-add-class${q.courses.length === 0 ? ' always' : ''}`} onClick={actions.addClass}>
           + class
         </button>
