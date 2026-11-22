@@ -6,8 +6,8 @@ import { ListPage } from './ListPage';
 import { HelpPage } from './HelpPage';
 import { Bare, LoginPage, Onboarding, ResetPasswordPage, SettingsPage } from './AccountPages';
 
-// log in as demo / demo to test onboarding; nothing it does is ever saved
-const DEMO_USERNAME = 'demo';
+// log in as test / test to test onboarding; nothing it does is ever saved
+const DEMO_USERNAME = 'test';
 
 function SignedIn() {
   const session = useSession();
