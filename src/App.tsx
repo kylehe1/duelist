@@ -16,7 +16,7 @@ function SignedIn() {
 function SignedOut({ children }: { children: ReactNode }) {
   const session = useSession();
   if (session === undefined) return <Bare />;
-  if (session) return <Navigate to="/" replace />;
+  if (session) return <Navigate to="/home" replace />;
   return <>{children}</>;
 }
 
@@ -33,12 +33,12 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<SignedOut><LoginPage /></SignedOut>} />
           <Route element={<SignedIn />}>
-            <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/settings/password" element={<ResetPasswordPage />} />
             <Route path="/help" element={<HelpPage />} />
           </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

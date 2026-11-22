@@ -99,7 +99,7 @@ export function LoginPage() {
       const { error } = await supabase.auth.signInWithPassword({ email, password: authPassword(password) });
       if (error) { setBusy(false); setError('wrong username or password'); return; }
     }
-    navigate('/', { replace: true });
+    navigate('/home', { replace: true });
   };
 
   return (
@@ -253,7 +253,7 @@ export function SettingsPage() {
   return (
     <AccountFrame glyph>
       <div className="acct-content acct-sub w420 settings">
-        <Link to="/" className="back-link">← back to list</Link>
+        <Link to="/home" className="back-link">← back to list</Link>
         <div className="settings-block">
           <SectionHeading>account</SectionHeading>
           <div className="setting-row">

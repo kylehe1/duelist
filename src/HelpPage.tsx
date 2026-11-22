@@ -117,7 +117,7 @@ export function HelpPage() {
     <AccountFrame glyph>
       <div className="acct-content help">
         <div className="help-top">
-          <Link to="/" className="back-link">{isDesktop ? '← back to list' : '← back'}</Link>
+          <Link to="/home" className="back-link">{isDesktop ? '← back to list' : '← back'}</Link>
           <div className="help-switch">
             {([['desktop', true], ['mobile', false]] as const).map(([label, d]) =>
               d === desktop
