@@ -73,18 +73,21 @@ export function ProfileMenu() {
       <button
         ref={btn}
         className="glyph-btn"
-        aria-label="account"
+        aria-label={`${usernameOf(session)}, account`}
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
+        <span className="glyph-user">{usernameOf(session)}</span>
         <span className="glyph" aria-hidden="true" />
       </button>
       {open && (
         <div className="menu" role="menu" ref={menu} onKeyDown={onKey}>
-          <div className="menu-user">{usernameOf(session)}</div>
           <button role="menuitem" className="menu-item" onClick={() => { close(true); navigate('/settings'); }}>
             account settings
+          </button>
+          <button role="menuitem" className="menu-item" onClick={() => { close(true); navigate('/help'); }}>
+            how to use
           </button>
           <button role="menuitem" className="menu-item" onClick={logOut}>
             log out
@@ -138,7 +141,8 @@ export function InlineConfirm({ name, onYes, onNo, size, returnFocus }: {
   name: string;
   onYes: () => void;
   onNo: () => void;
-  size: number;
+  /** font size in px; omit to let CSS set it */
+  size?: number;
   /** selector of the element to refocus after a keyboard cancel */
   returnFocus?: string;
 }) {
@@ -178,7 +182,7 @@ export function InlineConfirm({ name, onYes, onNo, size, returnFocus }: {
   };
 
   return (
-    <span className="confirm" style={{ fontSize: size }} ref={box} onKeyDown={onKey}>
+    <span className="confirm" style={size ? { fontSize: size } : undefined} ref={box} onKeyDown={onKey}>
       <span className="confirm-q">delete {name}?</span>
       <button
         ref={yes}

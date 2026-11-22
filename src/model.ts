@@ -21,11 +21,6 @@ export const isExam = (s: Status) => s === 'EXAM!!' || s === 'EXAM:)';
 /** statuses an item can move between: assignments and exams each have their own set */
 export const statusOptions = (s: Status): Status[] =>
   isExam(s) ? ['EXAM!!', 'EXAM:)'] : ['planned', 'working..', 'done!'];
-/** status to use when an item switches between assignment and exam */
-export const convertStatus = (s: Status, exam: boolean): Status => {
-  if (exam === isExam(s)) return s;
-  return exam ? (isFinished(s) ? 'EXAM:)' : 'EXAM!!') : (isFinished(s) ? 'done!' : 'planned');
-};
 
 const CHIP_CLASS: Record<Status, string> = {
   planned: 'planned',

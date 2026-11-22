@@ -1,20 +1,18 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useStore } from './store';
-import { noAuto } from './components';
+import { InlineConfirm, noAuto, useLongPress } from './components';
 import {
-  activeOf, chipClass, convertStatus, finishedOf, formatDate, formatTime, isDueSoon, isExam, isFinished,
+  activeOf, chipClass, finishedOf, formatDate, formatTime, isDueSoon, isExam, isFinished,
   parseDateInput, parseTimeInput, statusOptions, toDateInput, toTimeInput, uid,
   type AppState, type Assignment, type Course, type Status,
 } from './model';
 
-/* ---------- list-wide UI state: one add/edit form, one action strip ---------- */
+/* ---------- list-wide UI state: one add/edit form, one status menu, one delete confirm ---------- */
 
 export interface FormTarget { courseId: string; editId: string | null; }
 interface ListUI {
   form: FormTarget | null;
   setForm: (f: FormTarget | null) => void;
-  actionFor: string | null;
-  setActionFor: (id: string | null) => void;
   statusFor: string | null;
   setStatusFor: (id: string | null) => void;
   /** which delete confirm is open, e.g. "quarter:<id>", "tab:<id>", "title:<id>", "class:<id>" */
@@ -28,31 +26,24 @@ export const useListUI = () => useContext(ListUICtx)!;
 
 export function ListUIProvider({ children }: { children: React.ReactNode }) {
   const [form, setFormState] = useState<FormTarget | null>(null);
-  const [actionFor, setActionForState] = useState<string | null>(null);
-  const [statusFor, setStatusForState] = useState<string | null>(null);
+  const [statusFor, setStatusFor] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<string | null>(null);
-  const setActionFor = (id: string | null) => { setActionForState(id); setStatusForState(null); };
-  const setStatusFor = (id: string | null) => { setStatusForState(id); setActionForState(null); };
   const [finishedOpen, setFinishedOpen] = useState<Set<string>>(() => new Set());
 
+  // clicking or tapping outside an open add/edit form discards it
   useEffect(() => {
-    if (!actionFor) return;
+    if (!form) return;
     const onDown = (e: PointerEvent) => {
-      if (!(e.target as Element).closest?.('.actions')) setActionFor(null);
+      if (!(e.target as Element).closest?.('.addform')) setFormState(null);
     };
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setActionFor(null); };
     document.addEventListener('pointerdown', onDown);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('pointerdown', onDown);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [actionFor]);
+    return () => document.removeEventListener('pointerdown', onDown);
+  }, [form]);
 
   useEffect(() => {
     if (!statusFor) return;
     const onDown = (e: PointerEvent) => {
-      if (!(e.target as Element).closest?.('.status')) setStatusForState(null);
+      if (!(e.target as Element).closest?.('.status')) setStatusFor(null);
     };
     document.addEventListener('pointerdown', onDown);
     return () => document.removeEventListener('pointerdown', onDown);
@@ -60,9 +51,7 @@ export function ListUIProvider({ children }: { children: React.ReactNode }) {
 
   const ui: ListUI = {
     form,
-    setForm: (f) => { setFormState(f); setActionFor(null); },
-    actionFor,
-    setActionFor,
+    setForm: setFormState,
     statusFor,
     setStatusFor,
     confirm,
@@ -99,11 +88,11 @@ function tomorrowInput() {
 
 interface FormValues { name: string; year: number; month: number; day: number; time: number | null; exam: boolean; }
 
-function AddForm({ initial, submitLabel, onSubmit, onCancel }: {
+function AddForm({ initial, onSubmit, onCancel, onDelete }: {
   initial?: Assignment;
-  submitLabel: string;
   onSubmit: (v: FormValues) => void;
   onCancel: () => void;
+  onDelete?: () => void;
 }) {
   const [name, setName] = useState(initial?.name ?? '');
   const [date, setDate] = useState(
@@ -111,6 +100,15 @@ function AddForm({ initial, submitLabel, onSubmit, onCancel }: {
   );
   const [time, setTime] = useState(initial ? toTimeInput(initial.time) : '');
   const [exam, setExam] = useState(initial ? isExam(initial.status) : false);
+  const [confirming, setConfirming] = useState(false);
+  const nameRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const el = nameRef.current;
+    if (!el) return;
+    el.focus({ preventScroll: true });
+    el.setSelectionRange(el.value.length, el.value.length);
+  }, []);
 
   const submit = () => {
     const n = name.trim();
@@ -119,6 +117,8 @@ function AddForm({ initial, submitLabel, onSubmit, onCancel }: {
     lastDate = date;
     onSubmit({ name: n, ...d, time: parseTimeInput(time), exam });
   };
+
+  const types: [string, boolean][] = [['assignment', false], ['exam', true]];
 
   return (
     <div
@@ -129,10 +129,10 @@ function AddForm({ initial, submitLabel, onSubmit, onCancel }: {
       }}
     >
       <input
+        ref={nameRef}
         className="addform-name"
         placeholder="name"
         aria-label="assignment name"
-        autoFocus
         value={name}
         onChange={(e) => setName(e.target.value)}
         {...noAuto}
@@ -141,59 +141,44 @@ function AddForm({ initial, submitLabel, onSubmit, onCancel }: {
         <input type="date" className="addform-date" aria-label="due date" value={date} onChange={(e) => setDate(e.target.value)} />
         <input type="time" className="addform-time" aria-label="due time" value={time} onChange={(e) => setTime(e.target.value)} />
       </div>
-      <div className="addform-buttons">
-        <button className="addform-submit" onClick={submit}>{submitLabel}</button>
-        <button className="addform-cancel" onClick={onCancel}>cancel</button>
-        <button
-          type="button"
-          className={`chip ${exam ? 'st-exam' : 'st-planned'} kind-toggle`}
-          aria-pressed={exam}
-          aria-label={exam ? 'type: exam, tap to make it an assignment' : 'type: assignment, tap to make it an exam'}
-          onClick={() => setExam((e) => !e)}
-        >
-          {exam ? 'exam' : 'assignment'}
-        </button>
+      <div className="type-switch" role="radiogroup" aria-label="type">
+        {types.map(([label, isEx]) =>
+          isEx === exam ? (
+            <span key={label} className="type-current" role="radio" aria-checked="true">[{label}]</span>
+          ) : (
+            <button key={label} type="button" className="type-other" role="radio" aria-checked="false" onClick={() => setExam(isEx)}>
+              {label}
+            </button>
+          ),
+        )}
       </div>
+      {!initial ? (
+        <div className="addform-buttons">
+          <button className="addform-submit" onClick={submit}>add</button>
+          <button className="addform-cancel" onClick={onCancel}>cancel</button>
+        </div>
+      ) : confirming ? (
+        <div className="edit-confirm">
+          <InlineConfirm
+            name={initial.name}
+            returnFocus=".addform .edit-delete"
+            onYes={() => onDelete?.()}
+            onNo={() => setConfirming(false)}
+          />
+        </div>
+      ) : (
+        <div className="edit-buttons">
+          <button className="edit-cancel" onClick={onCancel}>cancel</button>
+          <button className="edit-save" onClick={submit}>save</button>
+          <span className="edit-spacer" />
+          <button className="edit-delete" onClick={() => setConfirming(true)}>delete</button>
+        </div>
+      )}
     </div>
   );
 }
 
 /* ---------- rows ---------- */
-
-function useRowActions(id: string) {
-  const ui = useListUI();
-  const timer = useRef<number | null>(null);
-  const start = useRef<{ x: number; y: number } | null>(null);
-  const cancel = () => {
-    if (timer.current != null) clearTimeout(timer.current);
-    timer.current = null;
-    start.current = null;
-  };
-  useEffect(() => cancel, []);
-  return {
-    onContextMenu: (e: React.MouseEvent) => { e.preventDefault(); ui.setActionFor(id); },
-    onPointerDown: (e: React.PointerEvent) => {
-      if (e.pointerType === 'mouse') return;
-      start.current = { x: e.clientX, y: e.clientY };
-      timer.current = window.setTimeout(() => { timer.current = null; ui.setActionFor(id); }, 500);
-    },
-    onPointerMove: (e: React.PointerEvent) => {
-      const s = start.current;
-      if (s && Math.hypot(e.clientX - s.x, e.clientY - s.y) > 10) cancel();
-    },
-    onPointerUp: cancel,
-    onPointerCancel: cancel,
-  };
-}
-
-function ActionStrip({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => void }) {
-  return (
-    <div className="actions">
-      <button className="action-edit" onClick={onEdit}>edit</button>
-      <button className="action-delete" onClick={onDelete}>delete</button>
-    </div>
-  );
-}
 
 function StatusPicker({ a, courseId, small }: { a: Assignment; courseId: string; small?: boolean }) {
   const { update } = useStore();
@@ -286,20 +271,20 @@ function StatusPicker({ a, courseId, small }: { a: Assignment; courseId: string;
 }
 
 function AssignmentRow({ a, courseId, finished }: { a: Assignment; courseId: string; finished?: boolean }) {
-  const { update } = useStore();
   const ui = useListUI();
-  const handlers = useRowActions(a.id);
-
-  const remove = () => {
-    ui.setActionFor(null);
-    update((d) => {
-      const c = findCourse(d, courseId);
-      if (c) c.assignments = c.assignments.filter((x) => x.id !== a.id);
-    });
+  const openEdit = () => ui.setForm({ courseId, editId: a.id });
+  const longPress = useLongPress(openEdit);
+  const handlers = {
+    ...longPress,
+    onContextMenu: (e: React.MouseEvent) => { e.preventDefault(); openEdit(); },
+    onClick: (e: React.MouseEvent) => { if (!(e.target as Element).closest('.status')) openEdit(); },
   };
-  const right = ui.actionFor === a.id
-    ? <ActionStrip onEdit={() => ui.setForm({ courseId, editId: a.id })} onDelete={remove} />
-    : <StatusPicker a={a} courseId={courseId} small={finished} />;
+  const right = (
+    <div className="row-right">
+      <button className="row-edit" onClick={openEdit} aria-label={`edit ${a.name}`}>edit</button>
+      <StatusPicker a={a} courseId={courseId} small={finished} />
+    </div>
+  );
 
   if (finished) {
     return (
@@ -340,7 +325,6 @@ export function CourseBody({ course }: { course: Course }) {
     <AddForm
       key={a.id}
       initial={a}
-      submitLabel="save"
       onCancel={() => ui.setForm(null)}
       onSubmit={(v) => {
         update((d) => {
@@ -348,9 +332,16 @@ export function CourseBody({ course }: { course: Course }) {
           if (!x) return;
           const { exam, ...rest } = v;
           Object.assign(x, rest);
-          x.status = convertStatus(x.status, exam);
+          if (exam !== isExam(x.status)) x.status = exam ? 'EXAM!!' : 'planned';
         });
         ui.setForm(null);
+      }}
+      onDelete={() => {
+        ui.setForm(null);
+        update((d) => {
+          const c = findCourse(d, course.id);
+          if (c) c.assignments = c.assignments.filter((x) => x.id !== a.id);
+        });
       }}
     />
   );
@@ -368,7 +359,7 @@ export function CourseBody({ course }: { course: Course }) {
     <>
       {active.length === 0 ? <div className="empty">nothing due</div> : active.map((a) => renderRow(a))}
       {form && form.editId === null ? (
-        <AddForm submitLabel="add" onSubmit={addNew} onCancel={() => ui.setForm(null)} />
+        <AddForm onSubmit={addNew} onCancel={() => ui.setForm(null)} />
       ) : (
         <button className="add-btn" onClick={() => ui.setForm({ courseId: course.id, editId: null })}>+ add</button>
       )}

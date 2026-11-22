@@ -16,11 +16,11 @@ Tomb of Ariel is the title of Volume 7 in Shadow Slave, a web novel by Guiltythr
 
 ## How to use it
 
-- **Add homework:** click `+ add` under a class, type a name, pick a date. The time is optional. Tap `assignment` to switch it to `exam`.
+- **Add homework:** click `+ add` under a class, type a name, pick a date. The time is optional. Pick `exam` instead of `assignment` for tests.
 - **Change status:** tap the label on the right and pick one. Assignments go `planned`, `working..`, `done!`. Exams go `EXAM!!`, `EXAM:)`.
 - **Finished stuff** (`done!` and `EXAM:)`) folds away into the `finished` list under each class.
 - **Due soon:** dates turn dark when something is due within two days.
-- **Edit or delete:** right-click an assignment on a laptop, or press and hold on a phone.
+- **Edit or delete:** click or tap an assignment (anywhere but its label) to edit it. `delete` is inside, and asks first.
 - **Rename anything:** click a class name, the term name or the little phrase at the top and just type.
 - **Delete a class or term:** hover over it on a laptop and click the `×`, or press and hold it on a phone. Then confirm with `yes`.
 - **New term:** click `+new` next to the term name.

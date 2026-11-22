@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { AuthProvider, useSession } from './auth';
 import { StoreProvider, useStore } from './store';
 import { ListPage } from './ListPage';
+import { HelpPage } from './HelpPage';
 import { Bare, LoginPage, Onboarding, ResetPasswordPage, SettingsPage } from './AccountPages';
 
 function SignedIn() {
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/settings/password" element={<ResetPasswordPage />} />
+            <Route path="/help" element={<HelpPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

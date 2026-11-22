@@ -41,18 +41,19 @@ input:focus-visible{outline:none}
 .glyph-wrap{position:relative}
 .d .glyph-wrap{margin:-6px -8px 0 0}
 .m .glyph-wrap{margin-right:-8px}
-.glyph-btn{position:relative;width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:transparent}
+.glyph-btn{display:flex;align-items:center;gap:10px;height:32px;padding:0 8px;background:transparent}
+.m .glyph-btn{height:44px}
+.glyph-user{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+/* shortcut: the username only ellipsizes when it can't fit beside the title (long names on ~375px phones) */
+.glyph-wrap,.glyph-btn{min-width:0;max-width:100%}
 .glyph-btn:hover{opacity:.6}
-.m .glyph-btn::before{content:'';position:absolute;inset:-6px}
-.glyph{position:relative;display:block;width:16px;height:16px}
+.glyph{position:relative;display:block;flex:none;width:16px;height:16px}
 .glyph::before{content:'';position:absolute;left:4.5px;top:0;width:7px;height:7px;border:1.3px solid var(--ink);border-radius:50%}
 .glyph::after{content:'';position:absolute;left:1.5px;bottom:0;width:13px;height:6.5px;border:1.3px solid var(--ink);
   border-bottom:none;border-radius:7px 7px 0 0}
-.menu{position:absolute;top:40px;right:0;z-index:10;width:184px;background:var(--surface);border:1px solid var(--line);
+.menu{position:absolute;top:calc(100% + 8px);right:0;z-index:10;width:184px;background:var(--surface);border:1px solid var(--line);
   border-radius:6px;box-shadow:0 8px 28px rgba(31,30,28,.10);padding:6px 0;text-align:left}
 .m .menu{width:200px}
-.menu-user{font-family:var(--mono);font-size:11px;color:var(--muted);padding:8px 14px 10px;
-  border-bottom:1px solid var(--line);margin-bottom:4px}
 .menu-item{display:flex;align-items:center;width:100%;min-height:32px;padding:0 14px;font-family:var(--sans);
   font-size:13px;color:var(--ink);text-align:left;text-decoration:none}
 .menu-item:hover{background:var(--bg)}
@@ -106,11 +107,6 @@ input:focus-visible{outline:none}
 .m .chip-sm{font-size:11px;height:30px;padding:0 10px}
 
 /* ---------- §5.3 action strip ---------- */
-.actions{display:flex;gap:12px;flex:none}
-.action-edit,.action-delete{font-family:var(--sans);font-size:12px}
-.action-edit{color:var(--ink)}
-.action-delete{color:var(--error)}
-.m .actions button{min-height:32px}
 
 /* status menu (9a) */
 .status{position:relative;flex:none}
@@ -128,7 +124,6 @@ input:focus-visible{outline:none}
 .status-current{color:var(--muted)}
 .m .status-menu{min-width:168px}
 .m .status-option{min-height:44px;font-size:13px}
-.kind-toggle{margin-left:auto}
 
 /* ---------- empty / add / finished ---------- */
 .empty{font-size:13px;color:var(--muted-2);padding:14px 0}
@@ -290,3 +285,65 @@ input:focus-visible{outline:none}
 .qs-item,.tab,.panel-name-wrap{-webkit-touch-callout:none}
 .qs-item .qs-other,.tab{-webkit-user-select:none;user-select:none}
 .panel-name-wrap{display:flex;flex:1;min-width:0}
+
+/* 12b: rows open the edit form */
+.row,.frow{cursor:pointer;position:relative}
+.row-right{position:relative;flex:none;display:flex;align-items:center}
+.row-edit{position:absolute;right:calc(100% + 14px);font-family:var(--mono);font-size:12px;color:var(--muted);opacity:0}
+.d .row:hover .row-edit,.d .frow:hover .row-edit,.row-edit:focus-visible{opacity:1}
+.d .row:hover::before,.d .frow:hover::before{content:'';position:absolute;inset:0 -8px;background:var(--surface);z-index:-1}
+.m .row-edit{width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+
+/* 12b: type switch + edit form buttons */
+.type-switch{display:flex;gap:14px;align-items:center;min-height:24px;font-family:var(--mono);font-size:12px}
+.m .type-switch{min-height:44px;font-size:13px}
+.type-current{color:var(--ink);font-weight:500}
+.type-other{color:var(--muted)}
+.type-other:hover{color:var(--ink)}
+.m .type-other{min-height:44px}
+.edit-buttons{display:flex;gap:16px;align-items:center}
+.edit-cancel,.edit-delete{font-family:var(--sans);font-size:13px}
+.edit-cancel{color:var(--muted)}
+.edit-cancel:hover{color:var(--ink)}
+.edit-delete{color:var(--error)}
+.edit-save{background:var(--ink);color:var(--bg);font-family:var(--sans);font-size:13px;height:34px;padding:0 16px;border-radius:5px}
+.edit-spacer{flex:1}
+.m .edit-cancel,.m .edit-delete{font-size:14px}
+.m .edit-save{font-size:14px;height:44px;padding:0 22px}
+.edit-confirm{display:flex;align-items:center;min-height:34px}
+.edit-confirm .confirm{font-size:12px}
+.m .edit-confirm{min-height:44px}
+.m .edit-confirm .confirm{font-size:13px}
+
+/* 12c: how to use */
+.m .help{margin-top:34px}
+.help-top{display:flex;justify-content:space-between;align-items:baseline;white-space:nowrap}
+.help-switch{display:flex;gap:16px;font-family:var(--mono);font-size:13px}
+.help-switch-current{color:var(--ink);font-weight:500}
+.help-switch-other{color:var(--muted)}
+.help-switch-other:hover{color:var(--ink)}
+.help-grid{display:flex;flex-direction:column;gap:36px;margin-top:28px}
+.d .help-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:48px}
+.help-nerds{margin-top:36px}
+.d .help-nerds{margin-top:20px}
+.help-title{font-family:var(--sans);font-weight:600;font-size:13px;letter-spacing:.02em;color:var(--ink)}
+.help-row{display:grid;grid-template-columns:72px minmax(0,1fr);gap:12px;padding:9px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.help-key{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.help-text{font-family:var(--sans);font-size:13px;line-height:1.45;text-wrap:pretty;color:var(--ink)}
+.help-ui{font-family:var(--mono);font-size:12px}
+.glyph-sm{display:inline-block;width:16px;height:16px;transform:scale(.75);margin:-2px;vertical-align:-1px}
+.glyph-sm::before,.glyph-sm::after{border-width:1.47px}
+.help-status{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.help-chip-slot{width:86px;flex:none}
+.help .chip{display:inline-block;height:auto;font-size:11px;padding:4px 8px;border-radius:4px;cursor:default}
+.help-foot{margin:0;padding-top:10px;font-family:var(--sans);font-size:12px;color:var(--muted);line-height:1.5}
+.help-swatches{display:grid;grid-template-columns:max-content;gap:0 40px;padding-top:10px}
+.d .help-swatches{grid-template-columns:repeat(3,max-content)}
+.help-swatch{display:flex;align-items:center;gap:8px;padding:5px 0;white-space:nowrap}
+.help-square{width:10px;height:10px;border-radius:2px;box-shadow:inset 0 0 0 1px rgba(31,30,28,.12)}
+.help-hex{font-family:var(--mono);font-size:12px;color:var(--ink)}
+.help-swatch-label{font-family:var(--sans);font-size:12px;color:var(--muted)}
+.help-fonts{display:flex;flex-direction:column;gap:6px;padding-top:16px}
+.help-font-serif{font-family:var(--serif);font-style:italic;font-size:17px}
+.help-font-sans{font-family:var(--sans);font-size:13px}
+.help-font-mono{font-family:var(--mono);font-size:12px}
