@@ -140,6 +140,14 @@ export function LoginPage() {
 
 /* ---------- §10.2 onboarding ---------- */
 
+/* drawn instead of the ⌫ character, which most fonts lack and render tiny */
+const BackspaceIcon = () => (
+  <svg width="15" height="11" viewBox="0 0 15 11" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round" strokeLinecap="round">
+    <path d="M4.5 0.75H13.5A0.75 0.75 0 0 1 14.25 1.5V9.5A0.75 0.75 0 0 1 13.5 10.25H4.5L0.75 5.5Z" />
+    <path d="M7.25 3.5L11 7.5M11 3.5L7.25 7.5" />
+  </svg>
+);
+
 export function Onboarding() {
   const { update } = useStore();
   const [step, setStep] = useState<1 | 2>(1);
@@ -234,7 +242,7 @@ export function Onboarding() {
                 }}
                 {...noAuto}
               />
-              <span className="class-hint" aria-hidden="true">{r.name === '' && rows.length > 1 ? '⌫' : '↵'}</span>
+              <span className="class-hint" aria-hidden="true">{r.name === '' && rows.length > 1 ? <BackspaceIcon /> : '↵'}</span>
             </div>
           ))}
         </div>

@@ -352,5 +352,6 @@ input:focus-visible{outline:none}
 .help-font-mono{font-family:var(--mono);font-size:12px}
 
 /* onboarding: hint on the row being typed in. ↵ adds a line, ⌫ on an empty line removes it */
-.class-hint{font-family:var(--mono);font-size:15px;line-height:1;color:var(--muted);opacity:0}
+.class-hint{font-family:var(--mono);font-size:13px;line-height:1;color:var(--muted);opacity:0}
 .class-row:focus-within .class-hint{opacity:1}
+.class-hint svg{display:block}
