@@ -266,7 +266,7 @@ export function InlineConfirm({ name, onYes, onNo, size, returnFocus }: {
 
   return (
     <span className="confirm" style={size ? { fontSize: size } : undefined} ref={box} onKeyDown={onKey}>
-      <span className="confirm-q">delete {name}?</span>
+      <span className="confirm-q">delete&nbsp;<span className="confirm-name">{name}</span>?</span>
       <button
         ref={yes}
         className="confirm-yes"

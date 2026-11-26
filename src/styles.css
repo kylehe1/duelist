@@ -328,6 +328,13 @@ input:focus-visible{outline:none}
 /* §11a inline delete confirm */
 .confirm{display:inline-flex;align-items:baseline;gap:10px;white-space:nowrap;font-family:var(--mono)}
 .confirm-q{color:var(--ink);font-weight:400}
+/* a long name shrinks to "…" so yes / no never leave the column; in the sideways-scrolling phone strips it keeps full width instead */
+.confirm{min-width:0;max-width:100%}
+.confirm-q{display:inline-flex;min-width:0}
+.confirm-name{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.confirm > button{flex:none}
+.tabs > .confirm,.qs > .confirm{flex:none;max-width:none}
+.edit-confirm{min-width:0}
 .confirm-yes{color:var(--error);font-weight:500}
 .confirm-yes:hover{text-decoration:underline}
 .confirm-no{color:var(--muted);font-weight:400}
