@@ -427,7 +427,7 @@ input:focus-visible{outline:none}
 @keyframes flash{0%,60%{opacity:1}100%{opacity:0}}
 
 /* ---------- 15: calendar ---------- */
-.cal-controls{display:flex;justify-content:space-between;align-items:center;margin:16px 0 12px} /* tight under the title so the day boxes get the height */
+.cal-controls{display:flex;justify-content:space-between;align-items:center;margin:28px 0 12px} /* closer than the original 44px so the day boxes get more height */
 .m .cal-controls{margin:14px 0 0}
 .cal-toggle{display:flex;align-items:center;gap:8px;min-height:24px;font-family:var(--sans);font-size:13px;color:var(--muted)}
 .cal-toggle.on{color:var(--ink)}

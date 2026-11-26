@@ -411,8 +411,6 @@ function DesktopCalendar() {
     window.addEventListener('resize', fit);
     return () => window.removeEventListener('resize', fit);
   }, []);
-  // how many items fit: 3 plus "+N more" needs the full 112px; 3 alone needs 90px (tighter padding below 100px); else 2
-  const limitFor = (total: number) => (cellH >= 111 || (total <= 3 && cellH >= 90) ? 3 : 2);
 
   const cells = monthGrid(nav.year, nav.month);
   const openKey = open && keyOf(open.date);
@@ -471,7 +469,7 @@ function DesktopCalendar() {
               <button key={x.a.id} className={`cal-asg st-${chipClass(x.a.status)}`} onClick={() => jump(x)}>{x.a.name}</button>
             )),
           ];
-          const limit = limitFor(total);
+          const limit = 2; // at most 2 items per day, then "+N more"
           // a neighboring month's day: go to that month, then add there
           const add = () => {
             if (out) nav.go(idxOf(d));
