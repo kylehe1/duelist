@@ -427,7 +427,7 @@ input:focus-visible{outline:none}
   border-top:1px solid var(--line);cursor:pointer}
 .cal-cell:not(:nth-child(7n+1)){border-left:1px solid var(--line)}
 .cal-cell:hover,.cal-cell.open{background:var(--surface)}
-.cal-num{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.cal-num{font-family:var(--mono);font-size:11px;color:#5e5b56} /* darker than --muted so this month stands apart from the --faint neighbor days */
 .cal-cell.out .cal-num{color:var(--faint)}
 .cal-num.today{color:var(--ink);font-weight:500}
 .cal-plus{position:absolute;top:4px;right:6px;font-family:var(--mono);font-size:13px;color:var(--ink);opacity:0}
