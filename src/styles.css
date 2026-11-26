@@ -506,3 +506,9 @@ textarea{font:inherit;color:inherit;margin:0;outline:none}
 .d.cal{padding-bottom:32px}
 .cal-cell > *{flex:none}
 .cal-cell[data-compact]{padding:5px 8px;gap:3px}
+/* hovering an item means edit (or open), not add: highlight the item, not the day */
+.cal-plan{border-radius:3px;padding:0 4px;margin:0 -4px;max-width:calc(100% + 8px)}
+.cal-plan:hover,.cal-plan.editing{background:rgba(31,30,28,.08)}
+.cal-asg:hover{border-color:var(--st-fg)}
+.cal-cell:has(.cal-plan:hover,.cal-asg:hover,.cal-more:hover):not(.open){background:transparent}
+.cal-cell:has(.cal-plan:hover,.cal-asg:hover,.cal-more:hover) .cal-plus{opacity:0}

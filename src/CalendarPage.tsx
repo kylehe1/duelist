@@ -458,7 +458,7 @@ function DesktopCalendar() {
           const total = items.plans.length + items.asg.length;
           const shown = [
             ...items.plans.map((p) => (
-              <button key={p.id} className="cal-plan" onClick={() => setOpen({ kind: 'edit', id: p.id, date: d })}>
+              <button key={p.id} className={`cal-plan${open?.kind === 'edit' && open.id === p.id ? ' editing' : ''}`} onClick={() => setOpen({ kind: 'edit', id: p.id, date: d })}>
                 {p.time != null && <span className="cal-plan-time">{formatRange(p.time, null)}</span>}
                 <span className="cal-plan-name">{p.name}</span>
               </button>
@@ -476,7 +476,7 @@ function DesktopCalendar() {
           return (
             <div
               key={k}
-              className={`cal-cell${out ? ' out' : ''}${openKey === k ? ' open' : ''}`}
+              className={`cal-cell${out ? ' out' : ''}${openKey === k && open?.kind !== 'edit' ? ' open' : ''}`}
               style={{ height: cellH }}
               data-compact={cellH < 100 || undefined}
               onClick={(e) => { if (!(e.target as Element).closest('button, .cal-pop')) add(); }}
