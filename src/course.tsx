@@ -107,6 +107,8 @@ function AddForm({ initial, onSubmit, onCancel, onDelete }: {
   const box = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // editing: focus the form, not the name, so a long name shows … instead of scrolling to the caret
+    if (initial) { box.current?.focus({ preventScroll: true }); return; }
     const el = nameRef.current;
     if (!el) return;
     el.focus({ preventScroll: true });
@@ -130,6 +132,7 @@ function AddForm({ initial, onSubmit, onCancel, onDelete }: {
     <div
       className={`addform${initial ? ' addform-edit' : ''}`}
       ref={box}
+      tabIndex={-1}
       onKeyDown={(e) => {
         if (e.key === 'Escape') { e.preventDefault(); onCancel(); }
         else if (e.key === 'Enter' && (e.target as Element).tagName === 'INPUT') { e.preventDefault(); submit(); }

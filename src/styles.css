@@ -180,6 +180,7 @@ input:focus-visible{outline:none}
 .m .add-btn{font-size:14px;height:48px;padding:0}
 
 .addform{display:flex;flex-direction:column;gap:10px;padding:14px 0;border-bottom:1px solid var(--ink)}
+.addform:focus{outline:none}
 .addform-name{font-family:var(--sans);font-size:14px;color:var(--ink);min-width:0;text-overflow:ellipsis}
 .addform-when{display:flex;gap:6px}
 .addform-date,.addform-time{font-family:var(--mono);font-size:11px;padding:4px;border:1px solid var(--input-border);

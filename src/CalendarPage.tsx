@@ -270,7 +270,7 @@ function PlanForm({ date, plan, onClose, mobile }: { date: Ymd; plan?: Plan; onC
 
   useEffect(() => {
     const el = nameRef.current;
-    if (el) {
+    if (el && !plan) { // editing: the popover takes focus instead, so a long name shows …
       el.focus({ preventScroll: true });
       el.setSelectionRange(el.value.length, el.value.length);
     }
