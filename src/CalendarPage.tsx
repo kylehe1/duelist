@@ -396,7 +396,7 @@ function DesktopCalendar() {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  // day boxes shrink (112px down to 86px) so all six weeks fit the window; below that the page scrolls
+  // day boxes shrink (112px down to 80px) so all six weeks fit the window with no scrolling; below that the page scrolls
   const grid = useRef<HTMLDivElement>(null);
   const [cellH, setCellH] = useState(112);
   useLayoutEffect(() => {
@@ -404,7 +404,7 @@ function DesktopCalendar() {
       const g = grid.current;
       if (!g) return;
       const rowsTop = g.getBoundingClientRect().top + window.scrollY + (g.querySelector<HTMLElement>('.cal-wd')?.offsetHeight ?? 0);
-      setCellH(Math.max(86, Math.min(112, Math.floor((window.innerHeight - rowsTop - 32) / 6))));
+      setCellH(Math.max(80, Math.min(112, Math.floor((window.innerHeight - Math.ceil(rowsTop) - 16 - 1) / 6)))); // 16 = .d.cal bottom padding
     };
     fit();
     void document.fonts?.ready.then(fit);

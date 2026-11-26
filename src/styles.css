@@ -427,7 +427,7 @@ input:focus-visible{outline:none}
 @keyframes flash{0%,60%{opacity:1}100%{opacity:0}}
 
 /* ---------- 15: calendar ---------- */
-.cal-controls{display:flex;justify-content:space-between;align-items:center;margin:44px 0 20px}
+.cal-controls{display:flex;justify-content:space-between;align-items:center;margin:16px 0 12px} /* tight under the title so the day boxes get the height */
 .m .cal-controls{margin:14px 0 0}
 .cal-toggle{display:flex;align-items:center;gap:8px;min-height:24px;font-family:var(--sans);font-size:13px;color:var(--muted)}
 .cal-toggle.on{color:var(--ink)}
@@ -542,7 +542,7 @@ textarea{font:inherit;color:inherit;margin:0;outline:none}
 .cal:has(.cal-picker) .cal-toggle,
 .cal:has(.cal-picker) .cal-arrow{pointer-events:none}
 
-.d.cal{padding-bottom:32px}
+.d.cal{padding-bottom:16px} /* CalendarPage sizes the day boxes with this 16px in mind */
 .cal-cell > *{flex:none}
 .cal-cell[data-compact]{padding:5px 8px;gap:3px}
 /* hovering an item means edit (or open), not add: highlight the item, not the day */
