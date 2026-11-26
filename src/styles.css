@@ -212,7 +212,6 @@ input:focus-visible{outline:none}
 .d .w360{width:360px}
 .d .w420{width:420px}
 .m .acct-content{margin-top:72px;width:100%}
-.m .acct-sub{margin-top:56px}
 
 .sh{display:flex;align-items:baseline;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--ink)}
 .sh-mark{font-family:var(--mono);font-size:12px;color:var(--muted)}
@@ -335,9 +334,9 @@ input:focus-visible{outline:none}
 .m .edit-confirm .confirm{font-size:13px}
 
 /* 12c: how to use */
-/* help: one gap everywhere: under the title, between sections, above for nerds (48px desktop, 36px phone) */
-.d .help{margin-top:48px}
-.m .help{margin-top:36px}
+/* help, settings, reset password: one gap under the title (and, on help, between sections): 48px desktop, 36px phone */
+.d .help,.d .acct-sub{margin-top:48px}
+.m .help,.m .acct-sub{margin-top:36px}
 .help-top{display:flex;justify-content:space-between;align-items:baseline;white-space:nowrap}
 .help-switch{display:flex;gap:16px;font-family:var(--mono);font-size:13px}
 .help-switch-current{color:var(--ink);font-weight:500}
