@@ -5,7 +5,7 @@ import { useIsDesktop } from './useIsDesktop';
 import { InlineConfirm, NameInput, ProfileMenu, TitleRow, noAuto, revealIn, useLongPress } from './components';
 import { CourseBody, ListUIProvider, activeCount, useListUI } from './course';
 import type { Course } from './model';
-import { activeOf, compareAssignments, currentQuarter, isFinished, randomPhrase, uid, type Assignment, type Quarter } from './model';
+import { PHRASES, activeOf, compareAssignments, currentQuarter, isFinished, randomPhrase, uid, type Assignment, type Quarter } from './model';
 
 /* ---------- shared header pieces ---------- */
 
@@ -149,7 +149,18 @@ function PhraseRow({ q }: { q: Quarter }) {
   const { setPhrase } = useQuarterActions(q);
   return (
     <div className="phrase-row">
-      <span className="phrase-mark">#</span>
+      <button
+        className="phrase-mark"
+        aria-label="new random phrase"
+        title="new phrase"
+        onClick={() => {
+          // re-roll: any phrase but the one showing
+          const others = PHRASES.filter((x) => x !== q.phrase);
+          setPhrase(others[Math.floor(Math.random() * others.length)]);
+        }}
+      >
+        #
+      </button>
       <input className="phrase-input" aria-label="phrase" value={q.phrase} onChange={(e) => setPhrase(e.target.value)} {...noAuto} />
     </div>
   );

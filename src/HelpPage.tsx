@@ -88,7 +88,7 @@ const littleThings = (verb: string): Rows => [
   [<span className="help-mark">!</span>, 'due within 2 days'],
   [<span className="help-mark late">!!</span>, 'late'],
   ['finished', <><Ui>▸ finished (N)</Ui> opens what's done. closed again next visit</>],
-  ['phrase', <>the <Ui>#</Ui> line under the name belongs to the term. {verb} to rewrite it</>],
+  ['phrase', <>the <Ui>#</Ui> line belongs to the term. {verb} to rewrite it, or {verb} the <Ui>#</Ui> for a random one</>],
   ['order', 'sorted by due date, soonest first'],
   ['saving', <>everything auto-saves as you type and add</>],
 ];

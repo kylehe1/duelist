@@ -70,6 +70,9 @@ input:focus-visible{outline:none}
 .d .qs::-webkit-scrollbar{display:none}
 .phrase-row{display:flex;align-items:baseline;gap:10px}
 .phrase-mark{font-family:var(--mono);font-size:15px;color:var(--muted)}
+/* click the # to re-roll the phrase; padding grows the hit area without moving it */
+.phrase-mark{padding:6px;margin:-6px}
+@media (hover:hover){.phrase-mark:hover{color:var(--ink)}}
 .phrase-input{font-family:var(--sans);font-weight:400;font-size:15px;color:var(--ink);flex:1;min-width:0}
 .qs{display:flex;gap:20px;align-items:baseline;font-family:var(--mono);font-size:13px;white-space:nowrap}
 .qs-current{color:var(--ink);font-weight:500}
