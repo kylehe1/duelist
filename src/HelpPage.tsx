@@ -2,7 +2,6 @@ import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { AccountFrame } from './AccountPages';
 import { ThemeIcon, useBackTo } from './components';
-import { useStore } from './store';
 import { useIsDesktop } from './useIsDesktop';
 
 const Ui = ({ children }: { children: ReactNode }) => <span className="help-ui">{children}</span>;
@@ -118,6 +117,7 @@ const lightSwatches: [string, string, string][] = [
   ['#9a978f', 'muted, lighter', 'var(--muted-2)'],
   ['#dfdcd5', 'lines', 'var(--line)'],
   ['#f6f4f0', 'menus, inputs', 'var(--surface)'],
+  ['#c4c1ba', 'faint', 'var(--faint)'],
 ];
 const darkSwatches: [string, string, string][] = [
   ['#1a1613', 'background', 'var(--bg)'],
@@ -144,8 +144,6 @@ const chipSwatches: [string, string, string][] = [
 export function HelpPage() {
   const isDesktop = useIsDesktop();
   const back = useBackTo();
-  const dark = useStore().state.settings.theme === 'dark';
-  const swatches = [...(dark ? darkSwatches : lightSwatches), ...chipSwatches];
   const [desktop, setDesktop] = useState(isDesktop);
   const copy = desktop ? desktopCopy : mobileCopy;
 
@@ -183,16 +181,21 @@ export function HelpPage() {
         </div>
         <div className="help-nerds">
           <Section title="for nerds">
-            <div className="help-showing">showing {dark ? 'dark' : 'light'}</div>
-            <div className="help-swatches">
-              {swatches.map(([hex, label, value]) => (
-                <div className="help-swatch" key={label}>
-                  <span className="help-square" style={{ background: value }} />
-                  <span className="help-hex">- {hex}</span>
-                  <span className="help-swatch-label">{label}</span>
+            {([['light', lightSwatches], ['dark', darkSwatches], ['status chips, both themes', chipSwatches]] as const).map(([title, list]) => (
+              <div key={title}>
+                <div className="help-showing">{title}</div>
+                <div className="help-swatches">
+                  {list.map(([hex, label, value]) => (
+                    <div className="help-swatch" key={label}>
+                      {/* palette squares use the real hex so both themes show correctly whichever is on */}
+                      <span className="help-square" style={{ background: title === 'status chips, both themes' ? value : hex }} />
+                      <span className="help-hex">- {hex}</span>
+                      <span className="help-swatch-label">{label}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
             <div className="help-fonts">
               <span className="help-font-serif">Instrument Serif italic</span>
               <span className="help-font-sans">Geist</span>
