@@ -29,7 +29,7 @@ export function Note({ children }: { children: ReactNode }) {
 /* §9 profile glyph + dropdown */
 export function ProfileMenu() {
   const session = useSession();
-  const { flush } = useStore();
+  const { flush, unsaved } = useStore();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
@@ -78,6 +78,7 @@ export function ProfileMenu() {
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
+        {unsaved && <span className="unsaved" role="status">not saved</span>}
         <span className="glyph-user">{usernameOf(session)}</span>
         <span className="glyph" aria-hidden="true" />
       </button>
@@ -108,6 +109,7 @@ export function NameInput(props: {
   size?: number;
 }) {
   const { value, onChange, focusKey, className, ariaLabel, size } = props;
+  const style = size ? ({ '--n': size } as React.CSSProperties) : undefined;
   const store = useStore();
   const ref = useRef<HTMLInputElement>(null);
   const orig = useRef(value);
@@ -126,6 +128,7 @@ export function NameInput(props: {
       className={className}
       value={value}
       size={size}
+      style={style}
       aria-label={ariaLabel}
       {...noAuto}
       onFocus={() => { orig.current = value; }}
@@ -134,6 +137,15 @@ export function NameInput(props: {
       onBlur={() => { if (value.trim() === '') onChange(orig.current); }}
     />
   );
+}
+
+/** scroll a sideways strip just enough to show all of el */
+export function revealIn(strip: HTMLElement | null, el: HTMLElement | null) {
+  if (!strip || !el) return;
+  const e = el.getBoundingClientRect();
+  const s = strip.getBoundingClientRect();
+  if (e.right > s.right) strip.scrollLeft += e.right - s.right;
+  else if (e.left < s.left) strip.scrollLeft -= s.left - e.left;
 }
 
 /* §11a inline delete confirm: "delete <name>? yes no", in place of the item */
@@ -163,9 +175,15 @@ export function InlineConfirm({ name, onYes, onNo, size, returnFocus }: {
   useEffect(() => {
     mountedAt.current = performance.now();
     no.current?.focus({ preventScroll: true });
+    // in a sideways-scrolling strip (phone tabs, terms) the confirm is wider than what it replaced: bring it into view
+    const strip = box.current?.parentElement?.closest<HTMLElement>('.tabs, .qs') ?? null;
+    revealIn(strip, box.current);
     const timer = window.setTimeout(() => cbs.current.onNo(), 5000);
     const onDown = (e: PointerEvent) => { if (!box.current?.contains(e.target as Node)) cbs.current.onNo(); };
-    const onScroll = () => cbs.current.onNo();
+    const onScroll = (e: Event) => {
+      if (e.target === strip && performance.now() - mountedAt.current < 300) return; // our own scroll above
+      cbs.current.onNo();
+    };
     document.addEventListener('pointerdown', onDown);
     document.addEventListener('scroll', onScroll, true);
     return () => {
