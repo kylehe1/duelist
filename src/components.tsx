@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from './supabase';
 import { usernameOf, useSession } from './auth';
 import { useStore } from './store';
@@ -7,6 +7,19 @@ import { useStore } from './store';
 export const noAuto = { autoCapitalize: 'off', autoCorrect: 'off', spellCheck: false } as const;
 
 export const SiteName = () => <div className="site-name">duelist</div>;
+
+/* 14a: [list] calendar, beside the title */
+export function ViewSwitch({ view }: { view: 'list' | 'calendar' }) {
+  const opt = (v: 'list' | 'calendar', to: string) =>
+    v === view
+      ? <span className="vs-current" aria-current="page">[{v}]</span>
+      : <Link className="vs-other" to={to}>{v}</Link>;
+  return <nav className="view-switch" aria-label="view">{opt('list', '/home')}{opt('calendar', '/calendar')}</nav>;
+}
+
+export const TitleRow = ({ view }: { view: 'list' | 'calendar' }) => (
+  <div className="title-row"><SiteName /><ViewSwitch view={view} /></div>
+);
 
 export function SectionHeading({ children }: { children: ReactNode }) {
   return (

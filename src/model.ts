@@ -12,9 +12,32 @@ export interface Assignment {
 }
 export interface Course { id: string; name: string; assignments: Assignment[]; }
 export interface Quarter { id: string; name: string; phrase: string; courses: Course[]; }
-export interface AppState { quarters: Quarter[]; currentQuarterId: string | null; }
+/** a personal calendar entry. time null = all day; endTime only with a time, and always after it */
+export interface Plan {
+  id: string;
+  name: string;
+  year: number;
+  month: number;
+  day: number;
+  time: number | null;
+  endTime: number | null;
+  note: string;
+  createdAt: number;
+}
+export interface AppState {
+  quarters: Quarter[];
+  currentQuarterId: string | null;
+  plans: Plan[];
+  calendar: { showAssignments: boolean };
+}
 
-export const emptyState = (): AppState => ({ quarters: [], currentQuarterId: null });
+export const emptyState = (): AppState => ({ quarters: [], currentQuarterId: null, plans: [], calendar: { showAssignments: true } });
+
+/** fills in fields added after a copy was saved (plans and calendar came with spec 15) */
+export function migrate(s: AppState): AppState {
+  if (Array.isArray(s.plans) && s.calendar) return s;
+  return { ...s, plans: s.plans ?? [], calendar: s.calendar ?? { showAssignments: true } };
+}
 
 export const isFinished = (s: Status) => s === 'done!' || s === 'EXAM:)';
 export const isExam = (s: Status) => s === 'EXAM!!' || s === 'EXAM:)';
@@ -69,6 +92,10 @@ export function parseDateInput(v: string) {
   if (!m) return null;
   return { year: +m[1], month: +m[2], day: +m[3] };
 }
+/** 9am, or 9am–11:40am */
+export const formatRange = (t: number | null, end: number | null) =>
+  t == null ? '' : end == null ? formatTime(t) : `${formatTime(t)}–${formatTime(end)}`;
+
 export const toTimeInput = (t: number | null) => (t == null ? '' : `${pad(Math.floor(t / 60))}:${pad(t % 60)}`);
 export function parseTimeInput(v: string): number | null {
   const m = /^(\d{2}):(\d{2})/.exec(v);

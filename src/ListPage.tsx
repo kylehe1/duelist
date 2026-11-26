@@ -1,10 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useStore } from './store';
 import { useIsDesktop } from './useIsDesktop';
-import { InlineConfirm, NameInput, ProfileMenu, SiteName, noAuto, revealIn, useLongPress } from './components';
+import { InlineConfirm, NameInput, ProfileMenu, TitleRow, noAuto, revealIn, useLongPress } from './components';
 import { CourseBody, ListUIProvider, activeCount, useListUI } from './course';
 import type { Course } from './model';
-import { activeOf, compareAssignments, currentQuarter, randomPhrase, uid, type Assignment, type Quarter } from './model';
+import { activeOf, compareAssignments, currentQuarter, isFinished, randomPhrase, uid, type Assignment, type Quarter } from './model';
 
 /* ---------- shared header pieces ---------- */
 
@@ -160,11 +161,44 @@ export function ListPage() {
   const { state } = useStore();
   const isDesktop = useIsDesktop();
   const q = currentQuarter(state)!;
+  const flash = useFlash(q);
   return (
-    <ListUIProvider>
-      {isDesktop ? <DesktopList q={q} /> : <MobileList key={q.id} q={q} />}
+    <ListUIProvider initialFinished={flash?.finished ? flash.courseId : undefined}>
+      {isDesktop ? <DesktopList q={q} /> : <MobileList key={q.id} q={q} startCourse={flash?.courseId} />}
     </ListUIProvider>
   );
+}
+
+/* arriving from the calendar with { flash: assignmentId }: open its class (and finished list), scroll to it, flash it */
+function useFlash(q: Quarter) {
+  const loc = useLocation();
+  const navigate = useNavigate();
+  const id = (loc.state as { flash?: string } | null)?.flash ?? null;
+  const [target] = useState(() => {
+    for (const c of q.courses) {
+      const a = c.assignments.find((x) => x.id === id);
+      if (a) return { courseId: c.id, finished: isFinished(a.status), id: a.id };
+    }
+    return null;
+  });
+  useEffect(() => {
+    if (!id) return;
+    navigate('.', { replace: true, state: null }); // a reload shouldn't flash again
+    const el = target && document.querySelector<HTMLElement>(`[data-aid="${target.id}"]`);
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const panel = el.closest<HTMLElement>('.panel');
+    if (panel) {
+      const p = panel.getBoundingClientRect();
+      if (r.bottom > p.bottom || r.top < p.top) panel.scrollTop += r.top - p.top - p.height / 3;
+    } else if (r.bottom > window.innerHeight || r.top < 0) {
+      window.scrollTo({ top: window.scrollY + r.top - window.innerHeight / 3 });
+    }
+    el.classList.add('flash');
+    const t = window.setTimeout(() => el.classList.remove('flash'), 1200);
+    return () => clearTimeout(t);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  return target;
 }
 
 /* ---------- desktop §5 ---------- */
@@ -175,7 +209,7 @@ function DesktopList({ q }: { q: Quarter }) {
     <div className="d frame-d">
       <header className="d-head">
         <div className="d-head-left">
-          <SiteName />
+          <TitleRow view="list" />
           <PhraseRow q={q} />
         </div>
         <div className="d-head-right">
@@ -253,7 +287,9 @@ function DesktopColHead({ q, c }: { q: Quarter; c: Course }) {
 
 const lastClassKey = (qid: string) => `toa:class:${qid}`;
 
-function initialIndex(q: Quarter) {
+function initialIndex(q: Quarter, startCourse?: string) {
+  const start = q.courses.findIndex((c) => c.id === startCourse);
+  if (start >= 0) return start;
   try {
     const saved = localStorage.getItem(lastClassKey(q.id));
     const i = q.courses.findIndex((c) => c.id === saved);
@@ -267,10 +303,10 @@ function initialIndex(q: Quarter) {
   return best ? (best as { i: number }).i : 0;
 }
 
-function MobileList({ q }: { q: Quarter }) {
+function MobileList({ q, startCourse }: { q: Quarter; startCourse?: string }) {
   const actions = useQuarterActions(q);
   const ui = useListUI();
-  const [rawIndex, setIndex] = useState(() => initialIndex(q));
+  const [rawIndex, setIndex] = useState(() => initialIndex(q, startCourse));
   const idx = Math.max(0, Math.min(rawIndex, q.courses.length - 1));
 
   const tabs = useRef<HTMLDivElement>(null);
@@ -370,7 +406,7 @@ function MobileList({ q }: { q: Quarter }) {
     <div className="m frame-m-list">
       <header className="m-head">
         <div className="m-namerow">
-          <SiteName />
+          <TitleRow view="list" />
           <ProfileMenu />
         </div>
         <div className="m-sub">

@@ -24,11 +24,11 @@ interface ListUI {
 const ListUICtx = createContext<ListUI | null>(null);
 export const useListUI = () => useContext(ListUICtx)!;
 
-export function ListUIProvider({ children }: { children: React.ReactNode }) {
+export function ListUIProvider({ children, initialFinished }: { children: React.ReactNode; initialFinished?: string }) {
   const [form, setFormState] = useState<FormTarget | null>(null);
   const [statusFor, setStatusFor] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<string | null>(null);
-  const [finishedOpen, setFinishedOpen] = useState<Set<string>>(() => new Set());
+  const [finishedOpen, setFinishedOpen] = useState<Set<string>>(() => new Set(initialFinished ? [initialFinished] : []));
 
   // clicking or tapping outside an open add/edit form discards it
   useEffect(() => {
@@ -186,7 +186,7 @@ function AddForm({ initial, onSubmit, onCancel, onDelete }: {
 
 /* ---------- rows ---------- */
 
-function StatusPicker({ a, courseId, small }: { a: Assignment; courseId: string; small?: boolean }) {
+export function StatusPicker({ a, courseId, small }: { a: Assignment; courseId: string; small?: boolean }) {
   const { update } = useStore();
   const ui = useListUI();
   const open = ui.statusFor === a.id;
@@ -289,7 +289,7 @@ function AssignmentRow({ a, courseId, finished }: { a: Assignment; courseId: str
 
   if (finished) {
     return (
-      <div className="frow" {...handlers}>
+      <div className="frow" data-aid={a.id} {...handlers}>
         <div className="frow-left">
           <span className="frow-date">{formatDate(a)}</span>
           <span className="frow-name">{a.name}</span>
@@ -302,7 +302,7 @@ function AssignmentRow({ a, courseId, finished }: { a: Assignment; courseId: str
     );
   }
   return (
-    <div className="row" {...handlers}>
+    <div className="row" data-aid={a.id} {...handlers}>
       <div className="row-left">
         <span className="row-name">{a.name}</span>
         <span className={`row-date${isDueSoon(a) ? ' soon' : ''}`}>

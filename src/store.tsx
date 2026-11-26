@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { supabase } from './supabase';
-import { emptyState, type AppState } from './model';
+import { emptyState, migrate, type AppState } from './model';
 import { mergeState } from './merge';
 
 /** base/baseAt: the last copy Supabase confirmed, and its updated_at. dirty: data has edits Supabase hasn't got yet. */
@@ -45,7 +45,7 @@ const RETRY_MS = 10_000;
 /** demo: a test account that never loads or saves. Every visit starts empty, so it always lands on onboarding. */
 export function StoreProvider({ userId, demo, children }: { userId: string; demo: boolean; children: ReactNode }) {
   const initial = useMemo(() => (demo ? null : readCache(userId)), [userId, demo]);
-  const [state, setState] = useState<AppState>(() => initial?.data ?? emptyState());
+  const [state, setState] = useState<AppState>(() => (initial ? migrate(initial.data) : emptyState()));
   const [ready, setReady] = useState(demo || initial != null);
   const [unsaved, setUnsaved] = useState(false);
 
@@ -91,7 +91,7 @@ export function StoreProvider({ userId, demo, children }: { userId: string; demo
       const r = await supabase.from('app_state').select('data, updated_at').eq('user_id', userId).maybeSingle();
       if (r.error) return false;
       if (!r.data) { baseAt.current = ''; continue; }
-      const remote = r.data.data as AppState;
+      const remote = migrate(r.data.data as AppState);
       const oldBase = base.current;
       latest.current = mergeState(oldBase, latest.current, remote);
       setState((prev) => mergeState(oldBase, prev, remote));
@@ -137,7 +137,7 @@ export function StoreProvider({ userId, demo, children }: { userId: string; demo
     if (error) return;
     if (dirty.current || running.current || seen !== syncs.current) return;
     if (data && Date.parse(data.updated_at as string) !== Date.parse(baseAt.current)) {
-      base.current = data.data as AppState;
+      base.current = migrate(data.data as AppState);
       baseAt.current = data.updated_at as string;
       syncs.current++;
       latest.current = base.current;

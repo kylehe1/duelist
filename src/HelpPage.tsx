@@ -44,6 +44,14 @@ const desktopCopy: Record<string, Rows> = {
     ['edit', 'hover the row, click edit, change anything, save'],
     ['delete', 'edit → delete → yes'],
   ],
+  calendar: [
+    ['open', <>click <Ui>calendar</Ui> next to the name</>],
+    ['add', 'click a day, type a name. time and note are optional'],
+    ['edit', 'click a plan'],
+    ['delete', 'click a plan → delete → yes'],
+    ['month', <><Ui>‹</Ui> <Ui>›</Ui>, or the arrow keys. click the month name to jump to today</>],
+    ['homework', <><Ui>show assignments</Ui> puts list items on their due dates</>],
+  ],
 };
 
 const mobileCopy: Record<string, Rows> = {
@@ -64,6 +72,14 @@ const mobileCopy: Record<string, Rows> = {
     ['status', 'tap the chip, pick one'],
     ['edit', 'tap the row (anywhere but the chip), change, save'],
     ['delete', 'edit → delete → yes'],
+  ],
+  calendar: [
+    ['open', <>tap <Ui>calendar</Ui> next to the name</>],
+    ['add', 'tap a day, then + add'],
+    ['edit', 'tap a plan'],
+    ['delete', 'tap a plan → delete → yes'],
+    ['month', <>swipe the month or tap <Ui>‹</Ui> <Ui>›</Ui>. tap the month name to jump to today</>],
+    ['homework', <><Ui>assignments</Ui> puts list items on their due dates</>],
   ],
 };
 
@@ -143,6 +159,7 @@ export function HelpPage() {
           </Section>
           <Section title="little things" rows={littleThings(desktop ? 'click' : 'tap')} />
           <Section title="account" rows={account} />
+          <Section title="calendar" rows={copy.calendar} />
         </div>
         <div className="help-nerds">
           <Section title="for nerds">
