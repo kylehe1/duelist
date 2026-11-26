@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { AccountFrame } from './AccountPages';
+import { useBackTo } from './components';
 import { useIsDesktop } from './useIsDesktop';
 
 const Ui = ({ children }: { children: ReactNode }) => <span className="help-ui">{children}</span>;
@@ -127,6 +128,7 @@ const swatches: [string, string, string][] = [
 
 export function HelpPage() {
   const isDesktop = useIsDesktop();
+  const back = useBackTo();
   const [desktop, setDesktop] = useState(isDesktop);
   const copy = desktop ? desktopCopy : mobileCopy;
 
@@ -134,7 +136,7 @@ export function HelpPage() {
     <AccountFrame glyph>
       <div className="acct-content help">
         <div className="help-top">
-          <Link to="/home" className="back-link">{isDesktop ? '← back to list' : '← back'}</Link>
+          <Link to={back.to} className="back-link">{isDesktop ? `← back to ${back.label}` : '← back'}</Link>
           <div className="help-switch">
             {([['desktop', true], ['mobile', false]] as const).map(([label, d]) =>
               d === desktop

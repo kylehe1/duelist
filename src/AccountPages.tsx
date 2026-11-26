@@ -4,7 +4,7 @@ import { supabase, emailFor, authPassword, MIN_PASSWORD } from './supabase';
 import { usernameOf, useSession } from './auth';
 import { useStore } from './store';
 import { useIsDesktop } from './useIsDesktop';
-import { Note, ProfileMenu, SectionHeading, SiteName, noAuto } from './components';
+import { Note, ProfileMenu, SectionHeading, SiteName, noAuto, useBackTo } from './components';
 import { randomPhrase, uid } from './model';
 
 /* ---------- frame ---------- */
@@ -262,10 +262,11 @@ export function Onboarding() {
 
 export function SettingsPage() {
   const session = useSession();
+  const back = useBackTo();
   return (
     <AccountFrame glyph>
       <div className="acct-content acct-sub w420 settings">
-        <Link to="/home" className="back-link">← back to list</Link>
+        <Link to={back.to} className="back-link">← back to {back.label}</Link>
         <div className="settings-block">
           <SectionHeading>account</SectionHeading>
           <div className="setting-row">
@@ -279,7 +280,7 @@ export function SettingsPage() {
               <span className="field-label">password</span>
               <span className="setting-value">••••••••</span>
             </div>
-            <Link to="/settings/password" className="setting-link">reset password</Link>
+            <Link to="/settings/password" state={back.state} className="setting-link">reset password</Link>
           </div>
         </div>
       </div>
@@ -292,6 +293,7 @@ export function SettingsPage() {
 export function ResetPasswordPage() {
   const session = useSession();
   const navigate = useNavigate();
+  const back = useBackTo();
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -334,7 +336,7 @@ export function ResetPasswordPage() {
   return (
     <AccountFrame glyph>
       <div className="acct-content acct-sub w320 reset">
-        <Link to="/settings" className="back-link">← account settings</Link>
+        <Link to="/settings" state={back.state} className="back-link">← account settings</Link>
         <form className="reset-block" onSubmit={(e) => { e.preventDefault(); void save(); }} noValidate>
           <SectionHeading>reset password</SectionHeading>
           <div className="fields">
@@ -344,7 +346,7 @@ export function ResetPasswordPage() {
             {msg && <div className={`msg ${msg.kind}${msg.fading ? ' fading' : ''}`}>{msg.text}</div>}
           </div>
           <div className="btn-row">
-            <button type="button" className="text-link" onClick={() => navigate('/settings')}>cancel</button>
+            <button type="button" className="text-link" onClick={() => navigate('/settings', { state: back.state })}>cancel</button>
             <button type="submit" className="primary" disabled={busy}>{busy ? '…' : 'save'}</button>
           </div>
         </form>

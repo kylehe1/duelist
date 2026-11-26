@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from './supabase';
 import { usernameOf, useSession } from './auth';
 import { useStore } from './store';
@@ -39,11 +39,22 @@ export function Note({ children }: { children: ReactNode }) {
   );
 }
 
+/** settings / help remember which view opened them (list, or calendar with its month) so "← back" returns there */
+type From = { from?: string } | null;
+export function useBackTo() {
+  const from = (useLocation().state as From)?.from;
+  const to = from?.startsWith('/calendar') ? from : '/home';
+  return { to, label: to === '/home' ? 'list' : 'calendar', state: { from: to } };
+}
+
 /* §9 profile glyph + dropdown */
 export function ProfileMenu() {
   const session = useSession();
   const { flush, unsaved } = useStore();
   const navigate = useNavigate();
+  const loc = useLocation();
+  // on list/calendar, remember this page; on settings/help, pass along where they came from
+  const from = /^\/(home|calendar)/.test(loc.pathname) ? loc.pathname + loc.search : (loc.state as From)?.from;
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   const btn = useRef<HTMLButtonElement>(null);
@@ -97,10 +108,10 @@ export function ProfileMenu() {
       </button>
       {open && (
         <div className="menu" role="menu" ref={menu} onKeyDown={onKey}>
-          <button role="menuitem" className="menu-item" onClick={() => { close(true); navigate('/settings'); }}>
+          <button role="menuitem" className="menu-item" onClick={() => { close(true); navigate('/settings', { state: { from } }); }}>
             account settings
           </button>
-          <button role="menuitem" className="menu-item" onClick={() => { close(true); navigate('/help'); }}>
+          <button role="menuitem" className="menu-item" onClick={() => { close(true); navigate('/help', { state: { from } }); }}>
             how to use
           </button>
           <button role="menuitem" className="menu-item" onClick={logOut}>
