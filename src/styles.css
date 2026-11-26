@@ -475,6 +475,7 @@ input:focus-visible{outline:none}
 .cal-plan{display:flex;gap:6px;align-items:baseline;min-width:0;max-width:100%;font-family:var(--sans);font-size:12px;line-height:1.3;
   color:var(--ink);text-align:left;white-space:nowrap}
 .cal-plan-time{flex:none;font-family:var(--mono);font-size:10px;color:var(--muted)}
+.cal-plan .cal-plan-time{width:7ch;text-align:right} /* fits "12:30pm"; right-aligned so names start together */
 .cal-plan-name{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .cal-asg{display:block;max-width:100%;font-family:var(--mono);font-size:10.5px;line-height:normal;padding:2px 6px;border-radius:3px;
   border:1px solid var(--st-border);background:var(--st-bg);color:var(--st-fg);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
