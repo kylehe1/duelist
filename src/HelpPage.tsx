@@ -90,7 +90,7 @@ const littleThings = (verb: string): Rows => [
   ['finished', <><Ui>▸ finished (N)</Ui> opens what's done. closed again next visit</>],
   ['phrase', <>the <Ui>#</Ui> line under the name belongs to the term. {verb} to rewrite it</>],
   ['order', 'sorted by due date, soonest first'],
-  ['saving', 'everything saves as you type'],
+  ['saving', <>everything auto-saves as you type and add</>],
 ];
 
 const account: Rows = [
