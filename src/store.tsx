@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { supabase } from './supabase';
 import { emptyState, migrate, type AppState } from './model';
 import { mergeState } from './merge';
+import { applyTheme } from './theme';
 
 /** base/baseAt: the last copy Supabase confirmed, and its updated_at. dirty: data has edits Supabase hasn't got yet. */
 interface Cache { data: AppState; base?: AppState | null; baseAt?: string; dirty?: boolean; updatedAt?: string; }
@@ -183,6 +184,10 @@ export function StoreProvider({ userId, demo, children }: { userId: string; demo
       document.removeEventListener('visibilitychange', onVis);
     };
   }, [pull, flush, demo]);
+
+  // the synced choice wins on load and on every fetch (last write wins across devices)
+  const theme = state.settings.theme;
+  useEffect(() => { if (ready && !demo) applyTheme(theme); }, [theme, ready, demo]);
 
   const value = useMemo(() => ({ state, ready, unsaved, update, flush, focusKey }), [state, ready, unsaved, update, flush]);
   return <StoreCtx.Provider value={value}>{children}</StoreCtx.Provider>;

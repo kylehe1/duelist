@@ -9,6 +9,32 @@
   --input-border:#d6d3cc;
   --error:oklch(0.50 0.19 25);
   --success:oklch(0.42 0.11 150);
+  --faint:#c4c1ba;                        /* calendar neighbor-month days */
+  --day:#5e5b56;                          /* calendar day numbers + status menu text: between muted and ink */
+  --hover:#e5e2dc;                        /* icon button hover square */
+  --placeholder:rgba(31,30,28,.45);
+  --shadow:0 8px 28px rgba(31,30,28,.10); /* dropdowns + popovers */
+  --chip-planned-fill:transparent;
+  color-scheme:light;
+}
+/* 19: dark (espresso). light is the default; set by data-theme on <html> */
+:root[data-theme="dark"]{
+  --bg:#1a1613;
+  --ink:#ebe3d5;
+  --muted:#93897a;
+  --muted-2:#6f665a;
+  --line:#2f2923;
+  --surface:#241f1a;
+  --input-border:#463d34;
+  --error:oklch(0.72 0.15 30);
+  --success:oklch(0.78 0.11 150);
+  --faint:#4f463c;
+  --day:#b8ad9c;
+  --hover:#241f1a;
+  --placeholder:rgba(235,227,213,.4);
+  --shadow:0 10px 32px rgba(0,0,0,.5);
+  --chip-planned-fill:#ebe3d5;
+  color-scheme:dark;
   --serif:'Instrument Serif', Georgia, serif;
   --sans:'Geist', system-ui, sans-serif;
   --mono:'Geist Mono', ui-monospace, monospace;
@@ -21,7 +47,10 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans)
 a{color:var(--ink)} a:hover{color:var(--muted)}
 input,button{font:inherit;color:inherit;background:none;border:none;padding:0;margin:0;outline:none;border-radius:0}
 button{cursor:pointer}
-input::placeholder{color:inherit;opacity:.45}
+input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
+::selection{background:var(--ink);color:var(--bg)}
+/* theme switch is instant: no transitions for the frame it happens in */
+.no-transition *{transition:none!important}
 :focus-visible{outline:1px solid var(--ink);outline-offset:3px}
 input:focus-visible{outline:none}
 
@@ -39,8 +68,17 @@ input:focus-visible{outline:none}
 
 /* ---------- §9 glyph + menu ---------- */
 .glyph-wrap{position:relative}
-.d .glyph-wrap{margin:-6px -8px 0 0}
-.m .glyph-wrap{margin-right:-8px}
+.head-group{display:flex;align-items:center;min-width:0}
+.d .head-group{margin:-6px -8px 0 0}
+.m .head-group{margin-right:-8px;max-width:100%}
+/* 20: sun / moon, shows the current mode */
+.theme-btn{flex:none;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;margin-right:-4px;
+  border-radius:6px;color:var(--ink)}
+.theme-btn svg{display:block}
+.m .theme-btn{width:44px;height:44px;margin-right:-8px}
+@media (hover:hover){.theme-btn:hover{background:var(--hover)}}
+@media (hover:none){.theme-btn:active{opacity:.6}}
+.theme-btn:focus-visible{outline-offset:2px}
 .glyph-btn{display:flex;align-items:center;gap:10px;height:32px;padding:0 8px;background:transparent}
 .m .glyph-btn{height:44px}
 .glyph-user{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
@@ -54,7 +92,7 @@ input:focus-visible{outline:none}
 .glyph::after{content:'';position:absolute;left:1.5px;bottom:0;width:13px;height:6.5px;border:1.3px solid var(--ink);
   border-bottom:none;border-radius:7px 7px 0 0}
 .menu{position:absolute;top:calc(100% + 8px);right:0;z-index:10;width:184px;background:var(--surface);border:1px solid var(--line);
-  border-radius:6px;box-shadow:0 8px 28px rgba(31,30,28,.10);padding:6px 0;text-align:left}
+  border-radius:6px;box-shadow:var(--shadow);padding:6px 0;text-align:left}
 .m .menu{width:200px}
 .menu-item{display:flex;align-items:center;width:100%;min-height:32px;padding:0 14px;font-family:var(--sans);
   font-size:13px;color:var(--ink);text-align:left;text-decoration:none}
@@ -104,7 +142,7 @@ input:focus-visible{outline:none}
 
 /* ---------- chips ---------- */
 /* status colors, defined once; shared by chips and the menu squares */
-.st-planned{--st-bg:transparent;--st-fg:#6a6762;--st-border:#cfccc4}
+.st-planned{--st-bg:var(--chip-planned-fill);--st-fg:#6a6762;--st-border:#cfccc4}
 .st-working{--st-bg:oklch(0.91 0.06 85);--st-fg:oklch(0.45 0.11 70);--st-border:oklch(0.84 0.08 80)}
 .st-done{--st-bg:oklch(0.91 0.045 150);--st-fg:oklch(0.42 0.11 150);--st-border:oklch(0.84 0.06 150)}
 .st-exam{--st-bg:oklch(0.90 0.05 25);--st-fg:oklch(0.50 0.19 25);--st-border:oklch(0.82 0.08 25)}
@@ -120,10 +158,10 @@ input:focus-visible{outline:none}
 /* status menu (9a) */
 .status{position:relative;flex:none}
 .status-menu{position:absolute;top:calc(100% + 6px);right:0;z-index:20;min-width:132px;padding:4px 0;text-align:left;
-  background:var(--surface);border:1px solid var(--line);border-radius:6px;box-shadow:0 8px 28px rgba(31,30,28,.10)}
+  background:var(--surface);border:1px solid var(--line);border-radius:6px;box-shadow:var(--shadow)}
 .status-menu.up{top:auto;bottom:calc(100% + 6px)}
 .status-option{display:flex;align-items:center;gap:10px;width:100%;min-height:30px;padding:0 12px;
-  font-family:var(--mono);font-size:12px;font-weight:400;color:#5e5b56;white-space:nowrap;text-align:left;
+  font-family:var(--mono);font-size:12px;font-weight:400;color:var(--day);white-space:nowrap;text-align:left;
   background:transparent;border:none;cursor:pointer}
 .status-option:hover,.status-option:focus-visible{background:var(--bg);outline:none}
 .status-option[aria-checked="true"]{background:var(--bg);color:var(--ink)}
@@ -362,7 +400,7 @@ input:focus-visible{outline:none}
 .help-swatches{display:grid;grid-template-columns:max-content;gap:0 40px;padding-top:10px}
 .d .help-swatches{grid-template-columns:repeat(3,max-content)}
 .help-swatch{display:flex;align-items:center;gap:8px;padding:5px 0;white-space:nowrap}
-.help-square{width:10px;height:10px;border-radius:2px;box-shadow:inset 0 0 0 1px rgba(31,30,28,.12)}
+.help-square{width:10px;height:10px;border-radius:2px;box-shadow:inset 0 0 0 1px var(--input-border)}
 .help-hex{font-family:var(--mono);font-size:12px;color:var(--ink)}
 .help-swatch-label{font-family:var(--sans);font-size:12px;color:var(--muted)}
 .help-fonts{display:flex;flex-direction:column;gap:6px;padding-top:16px}
@@ -389,7 +427,6 @@ input:focus-visible{outline:none}
 @keyframes flash{0%,60%{opacity:1}100%{opacity:0}}
 
 /* ---------- 15: calendar ---------- */
-:root{--faint:#c4c1ba}
 .cal-controls{display:flex;justify-content:space-between;align-items:center;margin:44px 0 20px}
 .m .cal-controls{margin:14px 0 0}
 .cal-toggle{display:flex;align-items:center;gap:8px;min-height:24px;font-family:var(--sans);font-size:13px;color:var(--muted)}
@@ -412,7 +449,7 @@ input:focus-visible{outline:none}
 
 /* month picker under the label */
 .cal-picker{position:absolute;top:calc(100% + 8px);right:0;z-index:20;width:264px;padding:12px;display:flex;flex-direction:column;gap:10px;
-  background:var(--surface);border:1px solid var(--line);border-radius:6px;box-shadow:0 8px 28px rgba(31,30,28,.10)}
+  background:var(--surface);border:1px solid var(--line);border-radius:6px;box-shadow:var(--shadow)}
 .mp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px}
 .mp-months{padding-top:10px;border-top:1px solid var(--line)}
 .mp-year,.mp-month{height:30px;border-radius:4px;font-family:var(--mono);font-size:12px;color:var(--muted)}
@@ -430,7 +467,7 @@ input:focus-visible{outline:none}
   border-top:1px solid var(--line);cursor:pointer}
 .cal-cell:not(:nth-child(7n+1)){border-left:1px solid var(--line)}
 .cal-cell:hover,.cal-cell.open{background:var(--surface)}
-.cal-num{font-family:var(--mono);font-size:11px;color:#5e5b56} /* darker than --muted so this month stands apart from the --faint neighbor days */
+.cal-num{font-family:var(--mono);font-size:11px;color:var(--day)} /* darker than --muted so this month stands apart from the --faint neighbor days */
 .cal-cell.out .cal-num{color:var(--faint)}
 .cal-num.today{color:var(--ink);font-weight:500}
 .cal-plus{position:absolute;top:4px;right:6px;font-family:var(--mono);font-size:13px;color:var(--ink);opacity:0}
@@ -445,7 +482,7 @@ input:focus-visible{outline:none}
 .cal-more:hover{color:var(--ink)}
 
 .cal-pop{position:absolute;top:-1px;width:280px;z-index:10;cursor:default;background:var(--surface);border:1px solid var(--line);
-  border-radius:6px;box-shadow:0 8px 28px rgba(31,30,28,.10);padding:14px;display:flex;flex-direction:column;gap:12px}
+  border-radius:6px;box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;gap:12px}
 .cal-pop.right{left:calc(100% + 6px)}
 .cal-pop.left{right:calc(100% + 6px)}
 .cal-pop.up{top:auto;bottom:-1px}
@@ -467,9 +504,9 @@ textarea{font:inherit;color:inherit;margin:0;outline:none}
 .plan-time:disabled{opacity:.45}
 .plan-dash{font-family:var(--mono);font-size:12px;color:var(--muted)}
 .plan-note{height:60px;resize:none;padding:8px;font-family:var(--sans);font-size:12px}
-.plan-note::placeholder{color:inherit;opacity:.45}
 /* phone: inline in the day list. 16px fields so iOS doesn't zoom in */
 .m .plan-form{padding:16px 0;border-bottom:1px solid var(--ink)}
+.m .plan-time,.m .plan-note{background:var(--surface)}
 .m .plan-name{font-size:16px}
 .m .plan-time{-webkit-appearance:none;appearance:none;height:40px;font-size:16px}
 .m .plan-note{height:72px;font-size:16px}
@@ -486,7 +523,7 @@ textarea{font:inherit;color:inherit;margin:0;outline:none}
 .mc-cell.sel .mc-num{background:var(--ink);color:var(--bg);font-weight:500}
 .mc-dots{display:flex;gap:3px;height:4px}
 .mc-dot{width:4px;height:4px;border-radius:50%;background:var(--ink)}
-.mc-dot[class*="st-"]{background:var(--st-fg)}
+.mc-dot[class*="st-"]{background:var(--st-border)}
 
 .cal-day-head{display:flex;align-items:baseline;gap:10px;margin-top:22px;padding-bottom:14px;border-bottom:1px solid var(--ink)}
 .cal-day-mark{font-family:var(--mono);font-size:16px;color:var(--muted)}
@@ -510,7 +547,7 @@ textarea{font:inherit;color:inherit;margin:0;outline:none}
 .cal-cell[data-compact]{padding:5px 8px;gap:3px}
 /* hovering an item means edit (or open), not add: highlight the item, not the day */
 .cal-plan{border-radius:3px;padding:0 4px;margin:0 -4px;max-width:calc(100% + 8px)}
-.cal-plan:hover,.cal-plan.editing{background:rgba(31,30,28,.08)}
+.cal-plan:hover,.cal-plan.editing{background:var(--line)}
 .cal-asg:hover{border-color:var(--st-fg)}
 .cal-cell:has(.cal-plan:hover,.cal-asg:hover,.cal-more:hover):not(.open){background:transparent}
 .cal-cell:has(.cal-plan:hover,.cal-asg:hover,.cal-more:hover) .cal-plus{opacity:0}
@@ -529,3 +566,6 @@ textarea{font:inherit;color:inherit;margin:0;outline:none}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .help-mark{font-weight:500;color:var(--ink)}
 .help-mark.late{color:var(--error)}
+/* help: inline sun / moon at 12px, and which palette "for nerds" shows */
+.help-icon svg{display:inline-block;width:12px;height:12px;vertical-align:-1px}
+.help-showing{padding-top:10px;font-family:var(--mono);font-size:11px;color:var(--muted)}

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from './supabase';
 import { usernameOf, useSession } from './auth';
 import { useStore } from './store';
+import { applyTheme } from './theme';
 
 export const noAuto = { autoCapitalize: 'off', autoCorrect: 'off', spellCheck: false } as const;
 
@@ -45,6 +46,39 @@ export function useBackTo() {
   const from = (useLocation().state as From)?.from;
   const to = from?.startsWith('/calendar') ? from : '/home';
   return { to, label: to === '/home' ? 'list' : 'calendar', state: { from: to } };
+}
+
+/* 20: sun in light, moon in dark (shows the current mode); click switches */
+const Sun = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" aria-hidden="true">
+    <circle cx="8" cy="8" r="2.8" />
+    <path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" />
+  </svg>
+);
+const Moon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" aria-hidden="true">
+    <path d="M13.2 9.6A5.6 5.6 0 0 1 6.4 2.8a5.6 5.6 0 1 0 6.8 6.8z" />
+  </svg>
+);
+export const ThemeIcon = ({ dark }: { dark: boolean }) => (dark ? <Moon /> : <Sun />);
+
+function ThemeToggle() {
+  const { state, update } = useStore();
+  const dark = state.settings.theme === 'dark';
+  return (
+    <button
+      className="theme-btn"
+      aria-label={dark ? 'switch to light mode' : 'switch to dark mode'}
+      aria-pressed={dark}
+      onClick={() => {
+        const next = dark ? 'light' : 'dark';
+        applyTheme(next);
+        update((d) => { d.settings.theme = next; });
+      }}
+    >
+      <ThemeIcon dark={dark} />
+    </button>
+  );
 }
 
 /* §9 profile glyph + dropdown */
@@ -93,6 +127,8 @@ export function ProfileMenu() {
   };
 
   return (
+    <div className="head-group">
+    <ThemeToggle />
     <div className="glyph-wrap" ref={wrap}>
       <button
         ref={btn}
@@ -119,6 +155,7 @@ export function ProfileMenu() {
           </button>
         </div>
       )}
+    </div>
     </div>
   );
 }

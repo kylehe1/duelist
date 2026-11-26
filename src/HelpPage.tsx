@@ -1,7 +1,8 @@
 import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { AccountFrame } from './AccountPages';
-import { useBackTo } from './components';
+import { ThemeIcon, useBackTo } from './components';
+import { useStore } from './store';
 import { useIsDesktop } from './useIsDesktop';
 
 const Ui = ({ children }: { children: ReactNode }) => <span className="help-ui">{children}</span>;
@@ -91,6 +92,7 @@ const littleThings = (verb: string): Rows => [
   ['phrase', <>the <Ui>#</Ui> line belongs to the term. {verb} to rewrite it, or {verb} the <Ui>#</Ui> for a random one</>],
   ['order', 'sorted by due date, soonest first'],
   ['saving', <>everything auto-saves as you type and add</>],
+  ['theme', <>{verb} <span className="help-icon"><ThemeIcon dark={false} /></span> / <span className="help-icon"><ThemeIcon dark /></span> next to your name</>],
 ];
 
 const account: Rows = [
@@ -108,13 +110,26 @@ const statuses: [string, string, string][] = [
 ];
 
 /* printed hex is the sRGB equivalent; the square renders the real token so it always matches */
-const swatches: [string, string, string][] = [
+/* the active theme's palette, then the status chips (the same in both themes) */
+const lightSwatches: [string, string, string][] = [
   ['#efede8', 'background', 'var(--bg)'],
   ['#1f1e1c', 'ink', 'var(--ink)'],
   ['#8d8a84', 'muted', 'var(--muted)'],
   ['#9a978f', 'muted, lighter', 'var(--muted-2)'],
   ['#dfdcd5', 'lines', 'var(--line)'],
   ['#f6f4f0', 'menus, inputs', 'var(--surface)'],
+];
+const darkSwatches: [string, string, string][] = [
+  ['#1a1613', 'background', 'var(--bg)'],
+  ['#ebe3d5', 'ink', 'var(--ink)'],
+  ['#93897a', 'muted', 'var(--muted)'],
+  ['#6f665a', 'muted, lighter', 'var(--muted-2)'],
+  ['#2f2923', 'lines', 'var(--line)'],
+  ['#241f1a', 'menus, inputs', 'var(--surface)'],
+  ['#4f463c', 'faint', 'var(--faint)'],
+  ['#ebe3d5', 'planned fill', 'var(--chip-planned-fill)'],
+];
+const chipSwatches: [string, string, string][] = [
   ['#6a6762', 'planned', '#6a6762'],
   ['#f4dfb4', 'working.. fill', 'oklch(0.91 0.06 85)'],
   ['#7b4800', 'working.. text', 'oklch(0.45 0.11 70)'],
@@ -129,6 +144,8 @@ const swatches: [string, string, string][] = [
 export function HelpPage() {
   const isDesktop = useIsDesktop();
   const back = useBackTo();
+  const dark = useStore().state.settings.theme === 'dark';
+  const swatches = [...(dark ? darkSwatches : lightSwatches), ...chipSwatches];
   const [desktop, setDesktop] = useState(isDesktop);
   const copy = desktop ? desktopCopy : mobileCopy;
 
@@ -166,9 +183,10 @@ export function HelpPage() {
         </div>
         <div className="help-nerds">
           <Section title="for nerds">
+            <div className="help-showing">showing {dark ? 'dark' : 'light'}</div>
             <div className="help-swatches">
               {swatches.map(([hex, label, value]) => (
-                <div className="help-swatch" key={hex}>
+                <div className="help-swatch" key={label}>
                   <span className="help-square" style={{ background: value }} />
                   <span className="help-hex">- {hex}</span>
                   <span className="help-swatch-label">{label}</span>

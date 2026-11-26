@@ -29,14 +29,23 @@ export interface AppState {
   currentQuarterId: string | null;
   plans: Plan[];
   calendar: { showAssignments: boolean };
+  settings: { theme: Theme };
 }
+export type Theme = 'light' | 'dark';
 
-export const emptyState = (): AppState => ({ quarters: [], currentQuarterId: null, plans: [], calendar: { showAssignments: true } });
+export const emptyState = (): AppState => ({
+  quarters: [], currentQuarterId: null, plans: [], calendar: { showAssignments: true }, settings: { theme: 'light' },
+});
 
-/** fills in fields added after a copy was saved (plans and calendar came with spec 15) */
+/** fills in fields added after a copy was saved (plans + calendar: spec 15, settings: spec 19) */
 export function migrate(s: AppState): AppState {
-  if (Array.isArray(s.plans) && s.calendar) return s;
-  return { ...s, plans: s.plans ?? [], calendar: s.calendar ?? { showAssignments: true } };
+  if (Array.isArray(s.plans) && s.calendar && s.settings) return s;
+  return {
+    ...s,
+    plans: s.plans ?? [],
+    calendar: s.calendar ?? { showAssignments: true },
+    settings: s.settings ?? { theme: 'light' },
+  };
 }
 
 export const isFinished = (s: Status) => s === 'done!' || s === 'EXAM:)';
