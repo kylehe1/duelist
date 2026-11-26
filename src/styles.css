@@ -498,3 +498,7 @@ textarea{font:inherit;color:inherit;margin:0;outline:none}
 .cal-empty{font-family:var(--sans);font-size:15px;color:var(--muted-2);padding:14px 0}
 .cal-add{display:flex;align-items:center;min-height:44px;font-family:var(--sans);font-size:15px;color:var(--muted)}
 .cal-pop:focus{outline:none}
+/* while the month picker is open nothing else reacts to the mouse (no hover, no + , no pointer); a click there just closes it */
+.cal:has(.cal-picker) > :not(.cal-controls),
+.cal:has(.cal-picker) .cal-toggle,
+.cal:has(.cal-picker) .cal-arrow{pointer-events:none}
