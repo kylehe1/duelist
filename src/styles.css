@@ -15,6 +15,9 @@
   --placeholder:rgba(31,30,28,.45);
   --shadow:0 8px 28px rgba(31,30,28,.10); /* dropdowns + popovers */
   --chip-planned-fill:transparent;
+  --serif:'Instrument Serif', Georgia, serif;
+  --sans:'Geist', system-ui, sans-serif;
+  --mono:'Geist Mono', ui-monospace, monospace;
   color-scheme:light;
 }
 /* 19: dark (espresso). light is the default; set by data-theme on <html> */
@@ -35,9 +38,6 @@
   --shadow:0 10px 32px rgba(0,0,0,.5);
   --chip-planned-fill:#ebe3d5;
   color-scheme:dark;
-  --serif:'Instrument Serif', Georgia, serif;
-  --sans:'Geist', system-ui, sans-serif;
-  --mono:'Geist Mono', ui-monospace, monospace;
 }
 
 /* ---------- §2 global ---------- */
