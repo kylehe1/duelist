@@ -204,6 +204,7 @@ input:focus-visible{outline:none}
 .frow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;color:var(--muted)}
 .frow-left{display:flex;gap:10px;align-items:baseline;min-width:0}
 .frow-date{font-family:var(--mono);font-size:11px;white-space:nowrap;min-width:5ch} /* 5ch = "12/31", so names line up */
+.frow-date.wide{min-width:13ch} /* "12/31 12:30pm" */
 .frow-name{font-family:var(--sans);font-size:13px;overflow-wrap:anywhere}
 .m .frow{padding:8px 0}
 .m .frow-date{font-size:12px}
@@ -570,3 +571,6 @@ textarea{font:inherit;color:inherit;margin:0;outline:none}
 /* help: inline sun / moon at 12px, and which palette "for nerds" shows */
 .help-icon svg{display:inline-block;width:12px;height:12px;vertical-align:-1px}
 .help-showing{padding-top:10px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.cal-asg{display:flex;gap:6px;align-items:baseline}
+.cal-asg-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.cal-asg-time{flex:none;font-size:10px;opacity:.75}

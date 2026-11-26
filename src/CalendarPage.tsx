@@ -4,7 +4,7 @@ import { useStore } from './store';
 import { useIsDesktop } from './useIsDesktop';
 import { InlineConfirm, ProfileMenu, TitleRow, halfTypedTime, noAuto, useLongPress } from './components';
 import { ListUIProvider, StatusPicker } from './course';
-import { chipClass, formatRange, toTimeInput, uid, type Assignment, type Plan } from './model';
+import { chipClass, formatRange, formatTime, toTimeInput, uid, type Assignment, type Plan } from './model';
 
 /* ---------- dates: native Date in local time, nothing stored but plans ---------- */
 
@@ -434,7 +434,7 @@ function DesktopCalendar() {
           {asg.map((x) => (
             <button key={x.a.id} className="cal-pop-asg" onClick={() => jump(x)}>
               <span className={`chip st-${chipClass(x.a.status)}`}>{x.a.name}</span>
-              <span className="cal-pop-class">{x.courseName}</span>
+              <span className="cal-pop-class">{x.courseName}{x.a.time != null && ` ${formatTime(x.a.time)}`}</span>
             </button>
           ))}
         </div>
@@ -467,7 +467,11 @@ function DesktopCalendar() {
               </button>
             )),
             ...items.asg.map((x) => (
-              <button key={x.a.id} className={`cal-asg st-${chipClass(x.a.status)}`} onClick={() => jump(x)}>{x.a.name}</button>
+              <button key={x.a.id} className={`cal-asg st-${chipClass(x.a.status)}`} onClick={() => jump(x)}>
+                {/* like plans: name left (… if long), due time right */}
+                <span className="cal-asg-name">{x.a.name}</span>
+                {x.a.time != null && <span className="cal-asg-time">{formatTime(x.a.time)}</span>}
+              </button>
             )),
           ];
           const limit = 2; // at most 2 items per day, then "+N more"
@@ -599,7 +603,10 @@ function MobileCalendar() {
         <div key={x.a.id} className="row" onClick={(e) => { if (!(e.target as Element).closest('.status')) jump(x); }}>
           <div className="row-left">
             <span className="row-name">{x.a.name}</span>
-            <span className="row-date">{x.courseName}</span>
+            <span className="row-date">
+              {x.courseName}
+              {x.a.time != null && <span className="row-time">{formatTime(x.a.time)}</span>}
+            </span>
           </div>
           <div className="row-right"><StatusPicker a={x.a} courseId={x.courseId} /></div>
         </div>

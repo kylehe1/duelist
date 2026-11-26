@@ -282,7 +282,7 @@ export function StatusPicker({ a, courseId, small }: { a: Assignment; courseId: 
   );
 }
 
-function AssignmentRow({ a, courseId, finished, now }: { a: Assignment; courseId: string; finished?: boolean; now: Date }) {
+function AssignmentRow({ a, courseId, finished, now, wideDate }: { a: Assignment; courseId: string; finished?: boolean; now: Date; wideDate?: boolean }) {
   const mark = urgency(a, now);
   const ui = useListUI();
   const openEdit = () => ui.setForm({ courseId, editId: a.id });
@@ -298,7 +298,10 @@ function AssignmentRow({ a, courseId, finished, now }: { a: Assignment; courseId
     return (
       <div className="frow" data-aid={a.id} {...handlers}>
         <div className="frow-left">
-          <span className="frow-date">{formatDate(a)}</span>
+          <span className={`frow-date${wideDate ? ' wide' : ''}`}>
+            {formatDate(a)}
+            {a.time != null && <span className="row-time">{formatTime(a.time)}</span>}
+          </span>
           <span className="frow-name">{a.name}</span>
         </div>
         <div className="row-right">
@@ -379,8 +382,12 @@ export function CourseBody({ course }: { course: Course }) {
       }}
     />
   );
+  // finished rows: if any has a time, every date column widens to fit "12/31 12:30pm" so names still line up
+  const finishedTimed = finished.some((a) => a.time != null);
   const renderRow = (a: Assignment, isDone?: boolean) =>
-    form?.editId === a.id ? editForm(a) : <AssignmentRow key={a.id} a={a} courseId={course.id} finished={isDone} now={now} />;
+    form?.editId === a.id
+      ? editForm(a)
+      : <AssignmentRow key={a.id} a={a} courseId={course.id} finished={isDone} now={now} wideDate={isDone && finishedTimed} />;
 
   const addNew = (v: FormValues) => {
     const { exam, ...rest } = v;
