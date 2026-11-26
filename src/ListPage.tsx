@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useStore } from './store';
 import { useIsDesktop } from './useIsDesktop';
-import { InlineConfirm, NameInput, ProfileMenu, SiteName, noAuto, useLongPress } from './components';
+import { InlineConfirm, NameInput, ProfileMenu, SiteName, noAuto, revealIn, useLongPress } from './components';
 import { CourseBody, ListUIProvider, activeCount, useListUI } from './course';
 import type { Course } from './model';
 import { activeOf, compareAssignments, currentQuarter, randomPhrase, uid, type Assignment, type Quarter } from './model';
@@ -53,8 +53,16 @@ function QuarterSwitcher({ className, desktop }: { className: string; desktop: b
       d.currentQuarterId = id;
     });
   };
+  // keep the current term in view when the terms scroll sideways
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const item = Array.from(box.current?.children ?? []).find((ch) => ch.querySelector('.qs-current'));
+    const after = item?.nextElementSibling;
+    // the newest term sits right before +new: show both
+    revealIn(box.current, (after?.classList.contains('qs-new') ? after : item) as HTMLElement | null);
+  }, [cur.id]);
   return (
-    <div className={className}>
+    <div className={className} ref={box}>
       {state.quarters.map((q) => (
         <QuarterItem key={q.id} q={q} current={q.id === cur.id} desktop={desktop} />
       ))}
@@ -74,9 +82,12 @@ function QuarterItem({ q, current, desktop }: { q: Quarter; current: boolean; de
   const longPress = useLongPress(() => ui.setConfirm(key));
 
   if (ui.confirm === key) {
+    const n = q.courses.length;
+    const m = q.courses.reduce((t, c) => t + c.assignments.length, 0);
+    const what = n === 0 ? '' : ` (${n} class${n === 1 ? '' : 'es'}, ${m} assignment${m === 1 ? '' : 's'})`;
     return (
       <InlineConfirm
-        name={q.name}
+        name={q.name + what}
         size={desktop ? 13 : 12}
         returnFocus={`[data-del="${key}"]`}
         onYes={() => { ui.setConfirm(null); removeQuarter(q.id); }}

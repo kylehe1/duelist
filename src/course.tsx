@@ -101,6 +101,7 @@ function AddForm({ initial, onSubmit, onCancel, onDelete }: {
   const [time, setTime] = useState(initial ? toTimeInput(initial.time) : '');
   const [exam, setExam] = useState(initial ? isExam(initial.status) : false);
   const [confirming, setConfirming] = useState(false);
+  const [dateError, setDateError] = useState(false);
   const nameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -113,6 +114,7 @@ function AddForm({ initial, onSubmit, onCancel, onDelete }: {
   const submit = () => {
     const n = name.trim();
     const d = parseDateInput(date);
+    if (!d) setDateError(true);
     if (!n || !d) return;
     lastDate = date;
     onSubmit({ name: n, ...d, time: parseTimeInput(time), exam });
@@ -138,19 +140,23 @@ function AddForm({ initial, onSubmit, onCancel, onDelete }: {
         {...noAuto}
       />
       <div className="addform-when">
-        <input type="date" className="addform-date" aria-label="due date" value={date} onChange={(e) => setDate(e.target.value)} />
+        <input type="date" className="addform-date" aria-label="due date" value={date} onChange={(e) => { setDate(e.target.value); setDateError(false); }} />
         <input type="time" className="addform-time" aria-label="due time" value={time} onChange={(e) => setTime(e.target.value)} />
       </div>
+      {dateError && <div className="msg error" role="alert">pick a date</div>}
       <div className="type-switch" role="radiogroup" aria-label="type">
-        {types.map(([label, isEx]) =>
-          isEx === exam ? (
-            <span key={label} className="type-current" role="radio" aria-checked="true">[{label}]</span>
-          ) : (
-            <button key={label} type="button" className="type-other" role="radio" aria-checked="false" onClick={() => setExam(isEx)}>
-              {label}
-            </button>
-          ),
-        )}
+        {types.map(([label, isEx]) => (
+          <button
+            key={label}
+            type="button"
+            className={isEx === exam ? 'type-current' : 'type-other'}
+            role="radio"
+            aria-checked={isEx === exam}
+            onClick={() => setExam(isEx)}
+          >
+            {isEx === exam ? `[${label}]` : label}
+          </button>
+        ))}
       </div>
       {!initial ? (
         <div className="addform-buttons">
@@ -279,12 +285,7 @@ function AssignmentRow({ a, courseId, finished }: { a: Assignment; courseId: str
     onContextMenu: (e: React.MouseEvent) => { e.preventDefault(); openEdit(); },
     onClick: (e: React.MouseEvent) => { if (!(e.target as Element).closest('.status')) openEdit(); },
   };
-  const right = (
-    <div className="row-right">
-      <button className="row-edit" onClick={openEdit} aria-label={`edit ${a.name}`}>edit</button>
-      <StatusPicker a={a} courseId={courseId} small={finished} />
-    </div>
-  );
+  const edit = <button className="row-edit" onClick={openEdit} aria-label={`edit ${a.name}`}>edit</button>;
 
   if (finished) {
     return (
@@ -293,7 +294,10 @@ function AssignmentRow({ a, courseId, finished }: { a: Assignment; courseId: str
           <span className="frow-date">{formatDate(a)}</span>
           <span className="frow-name">{a.name}</span>
         </div>
-        {right}
+        <div className="row-right">
+          {edit}
+          <StatusPicker a={a} courseId={courseId} small />
+        </div>
       </div>
     );
   }
@@ -304,9 +308,12 @@ function AssignmentRow({ a, courseId, finished }: { a: Assignment; courseId: str
         <span className={`row-date${isDueSoon(a) ? ' soon' : ''}`}>
           {formatDate(a)}
           {a.time != null && <span className="row-time">{formatTime(a.time)}</span>}
+          {edit}
         </span>
       </div>
-      {right}
+      <div className="row-right">
+        <StatusPicker a={a} courseId={courseId} />
+      </div>
     </div>
   );
 }

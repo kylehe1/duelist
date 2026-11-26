@@ -47,6 +47,7 @@ input:focus-visible{outline:none}
 /* shortcut: the username only ellipsizes when it can't fit beside the title (long names on ~375px phones) */
 .glyph-wrap,.glyph-btn{min-width:0;max-width:100%}
 .glyph-btn:hover{opacity:.6}
+.unsaved{font-family:var(--mono);font-size:12px;color:var(--error);white-space:nowrap}
 .glyph{position:relative;display:block;flex:none;width:16px;height:16px}
 .glyph::before{content:'';position:absolute;left:4.5px;top:0;width:7px;height:7px;border:1.3px solid var(--ink);border-radius:50%}
 .glyph::after{content:'';position:absolute;left:1.5px;bottom:0;width:13px;height:6.5px;border:1.3px solid var(--ink);
@@ -61,8 +62,11 @@ input:focus-visible{outline:none}
 
 /* ---------- §5.1 desktop header ---------- */
 .d-head{display:flex;justify-content:space-between;align-items:flex-start;gap:32px}
-.d-head-left{display:flex;flex-direction:column;gap:24px;min-width:0;flex:1}
-.d-head-right{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;align-self:stretch;gap:16px}
+.d-head-left{display:flex;flex-direction:column;gap:24px;min-width:280px;flex:1}
+.d-head-right{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;align-self:stretch;gap:16px;min-width:0}
+/* many terms: scroll sideways (vertical padding keeps focus rings from being clipped) */
+.d .qs{max-width:100%;overflow-x:auto;scrollbar-width:none;padding-block:4px;margin-block:-4px}
+.d .qs::-webkit-scrollbar{display:none}
 .phrase-row{display:flex;align-items:baseline;gap:10px}
 .phrase-mark{font-family:var(--mono);font-size:15px;color:var(--muted)}
 .phrase-input{font-family:var(--sans);font-weight:400;font-size:15px;color:var(--ink);flex:1;min-width:0}
@@ -81,7 +85,7 @@ input:focus-visible{outline:none}
 .d-cols:hover .d-add-class,.d-add-class:focus-visible,.d-add-class.always{opacity:1}
 .col-head{display:flex;align-items:baseline;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--ink)}
 .col-mark{font-family:var(--mono);font-size:12px;color:var(--muted)}
-.col-name{font-family:var(--sans);font-weight:600;font-size:13px;letter-spacing:.02em;color:var(--ink);flex:1;min-width:0}
+.col-name{font-family:var(--sans);font-weight:600;font-size:13px;letter-spacing:.02em;color:var(--ink);flex:1;min-width:0;text-overflow:ellipsis}
 .col-count{font-family:var(--mono);font-weight:400;font-size:11px;color:var(--muted)}
 
 /* ---------- rows ---------- */
@@ -147,9 +151,9 @@ input:focus-visible{outline:none}
 .m .addform{gap:12px;padding:16px 0}
 .m .addform-name{font-size:16px}
 .m .addform-when{gap:8px}
-.m .addform-date,.m .addform-time{-webkit-appearance:none;appearance:none;height:40px;font-size:13px;padding:0 8px;border-radius:5px;
+.m .addform-date,.m .addform-time{-webkit-appearance:none;appearance:none;height:40px;font-size:16px;padding:0 8px;border-radius:5px;
   display:flex;align-items:center}
-.m .addform-time{width:110px}
+.m .addform-time{width:120px}
 .m .addform-buttons{gap:16px}
 .m .addform-submit{font-size:14px;height:44px;padding:0 22px;border-radius:5px}
 .m .addform-cancel{font-size:14px}
@@ -168,15 +172,25 @@ input:focus-visible{outline:none}
 .m-head{display:flex;flex-direction:column;gap:18px;padding:0 28px;flex:none}
 .m-namerow{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .m-sub{display:flex;flex-direction:column;gap:12px;min-width:0}
-.m .qs{font-size:12px;gap:12px;overflow-x:auto;scrollbar-width:none}
+.m .qs{font-size:12px;gap:0;overflow-x:auto;scrollbar-width:none;padding:12px 0;margin:-12px -6px}
+/* tap areas ~40px tall, spread over the old 12px gaps */
+.m .qs-other,.m .qs-new{padding:12px 6px;margin:-12px 0}
+.m .qs-item:has(.qs-current),.m .qs > .confirm{padding:0 6px}
+/* term name: 16px so iOS doesn't zoom in, drawn at 12px; --n is its width in characters */
+.m .qs-input{font-size:16px;margin-block:-2px;width:calc(var(--n) * 1ch);margin-right:calc(var(--n) * -.25ch);transform:scale(.75);transform-origin:0 70%}
 .m .qs::-webkit-scrollbar{display:none}
-.m .phrase-mark{font-size:13px}
-.m .phrase-input{font-size:13px;width:100%}
-.tabs{position:relative;display:flex;gap:18px;margin-top:28px;overflow-x:auto;scrollbar-width:none}
+/* phone phrase: laid out at 16px so iOS doesn't zoom into it, drawn at 13px (scale .8125).
+   The wider box and negative margin cancel out, and the negative bottom margin removes the extra height */
+.m .phrase-row{gap:12.3px;width:123.077%;margin:0 -23.077% -3.7px 0;transform:scale(.8125);transform-origin:0 0}
+.m .phrase-mark{font-size:16px}
+.m .phrase-input{font-size:16px}
+.tabs{position:relative;display:flex;gap:0;margin:18px -9px 0;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
-.tab{flex:none;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--muted-2);padding:0 0 6px;
-  border-bottom:1.5px solid transparent;white-space:nowrap}
-.tab.active{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+.tab{position:relative;flex:none;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--muted-2);padding:10px 9px 7.5px;
+  white-space:nowrap}
+.tab.active{color:var(--ink);font-weight:600}
+.tab.active::after{content:'';position:absolute;left:9px;right:9px;bottom:0;height:1.5px;background:var(--ink)}
+.tabs > .confirm{padding:10px 9px 7.5px}
 .tab-add{font-weight:400}
 
 .viewport{flex:1;min-height:0;overflow:hidden;touch-action:pan-y}
@@ -185,7 +199,7 @@ input:focus-visible{outline:none}
   padding:32px 28px calc(40px + env(safe-area-inset-bottom, 0px))}
 .panel-title{display:flex;align-items:baseline;gap:10px;padding-bottom:18px;border-bottom:1px solid var(--ink)}
 .panel-mark{font-family:var(--mono);font-size:20px;color:var(--muted)}
-.panel-name{font-family:var(--sans);font-weight:500;font-size:20px;letter-spacing:0;color:var(--ink);flex:1;min-width:0}
+.panel-name{font-family:var(--sans);font-weight:500;font-size:20px;letter-spacing:0;color:var(--ink);flex:1;min-width:0;text-overflow:ellipsis}
 .panel-count{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
 @media (prefers-reduced-motion: reduce){ .track{transition:none !important} }
 
@@ -291,8 +305,9 @@ input:focus-visible{outline:none}
 /* 12b: rows open the edit form */
 .row,.frow{cursor:pointer;position:relative}
 .row-right{position:relative;flex:none;display:flex;align-items:center}
-/* in the flow (not floating) so long names wrap before it instead of running under it */
+/* finished rows: beside the chip, in the flow so long names wrap before it. active rows: at the end of the date line */
 .row-edit{margin-right:14px;font-family:var(--mono);font-size:12px;color:var(--muted);opacity:0}
+.row-date .row-edit{margin:0 0 0 10px;font-size:inherit}
 .d .row:hover .row-edit,.d .frow:hover .row-edit,.row-edit:focus-visible{opacity:1}
 .d .row:hover::before,.d .frow:hover::before{content:'';position:absolute;inset:0 -8px;background:var(--surface);z-index:-1}
 .m .row-edit{position:absolute;margin:0;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}

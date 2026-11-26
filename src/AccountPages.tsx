@@ -165,7 +165,7 @@ export function Onboarding() {
 
   const next = () => {
     if (!name.trim()) return;
-    focusRow.current = rows[0]?.id ?? null;
+    focusRow.current = rows[rows.length - 1]?.id ?? null; // the end, where you'd keep typing
     setStep(2);
   };
 
