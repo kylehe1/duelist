@@ -195,7 +195,21 @@ function Controls({ nav, desktop, onNav }: { nav: Nav; desktop: boolean; onNav: 
 function MonthPicker({ nav, onPick, onClose }: { nav: Nav; onPick: (i: number) => void; onClose: (refocus: boolean) => void }) {
   const [year, setYear] = useState(nav.year);
   const box = useRef<HTMLDivElement>(null);
-  useOutside(true, '.cal-nav', () => onClose(false));
+  // a click anywhere but the picker (or the label, which toggles it) only closes it: it doesn't also add a plan, change month, etc.
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  useEffect(() => {
+    const swallow = (e: MouseEvent) => { e.preventDefault(); e.stopPropagation(); };
+    const onDown = (e: PointerEvent) => {
+      if ((e.target as Element).closest?.('.cal-picker, .cal-label')) return;
+      document.addEventListener('click', swallow, { capture: true, once: true });
+      // shortcut: a press that never becomes a click (a scroll) leaves the swallow armed for 400ms
+      window.setTimeout(() => document.removeEventListener('click', swallow, true), 400);
+      closeRef.current(false);
+    };
+    document.addEventListener('pointerdown', onDown, true);
+    return () => document.removeEventListener('pointerdown', onDown, true);
+  }, []);
   useEffect(() => { box.current?.querySelector<HTMLElement>('.mp-month.current')?.focus({ preventScroll: true }); }, []);
   const first = Math.floor(nav.min / 12);
   const years = Array.from({ length: Math.floor(nav.max / 12) - first + 1 }, (_, i) => first + i);
