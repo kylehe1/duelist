@@ -139,6 +139,9 @@ function Controls({ nav, desktop, onNav }: { nav: Nav; desktop: boolean; onNav: 
   const { state, update } = useStore();
   const on = state.calendar.showAssignments;
   const name = MONTHS[nav.month - 1];
+  const [picking, setPicking] = useState(false);
+  const label = useRef<HTMLButtonElement>(null);
+  const go = (i: number) => { setPicking(false); onNav(i); };
   const arrow = (dir: -1 | 1) => {
     const end = dir < 0 ? nav.idx <= nav.min : nav.idx >= nav.max;
     return (
@@ -146,7 +149,7 @@ function Controls({ nav, desktop, onNav }: { nav: Nav; desktop: boolean; onNav: 
         className="cal-arrow"
         aria-label={dir < 0 ? 'previous month' : 'next month'}
         aria-disabled={end}
-        onClick={() => { if (!end) onNav(nav.idx + dir); }}
+        onClick={() => { if (!end) go(nav.idx + dir); }}
       >
         {dir < 0 ? '‹' : '›'}
       </button>
@@ -165,11 +168,70 @@ function Controls({ nav, desktop, onNav }: { nav: Nav; desktop: boolean; onNav: 
       </button>
       <div className="cal-nav">
         {arrow(-1)}
-        <button className="cal-label" aria-label={`${name} ${nav.year}, go to this month`} onClick={() => onNav(nav.now)}>
+        <button
+          ref={label}
+          className="cal-label"
+          aria-label={`${name} ${nav.year}, pick a month`}
+          aria-haspopup="dialog"
+          aria-expanded={picking}
+          onClick={() => setPicking((p) => !p)}
+        >
           {desktop ? name : name.slice(0, 3)} {nav.year}
         </button>
         {arrow(1)}
+        {picking && (
+          <MonthPicker
+            nav={nav}
+            onPick={go}
+            onClose={(refocus) => { setPicking(false); if (refocus) label.current?.focus(); }}
+          />
+        )}
       </div>
+    </div>
+  );
+}
+
+/** every month in range at a glance: pick a year, then a month */
+function MonthPicker({ nav, onPick, onClose }: { nav: Nav; onPick: (i: number) => void; onClose: (refocus: boolean) => void }) {
+  const [year, setYear] = useState(nav.year);
+  const box = useRef<HTMLDivElement>(null);
+  useOutside(true, '.cal-nav', () => onClose(false));
+  useEffect(() => { box.current?.querySelector<HTMLElement>('.mp-month.current')?.focus({ preventScroll: true }); }, []);
+  const first = Math.floor(nav.min / 12);
+  const years = Array.from({ length: Math.floor(nav.max / 12) - first + 1 }, (_, i) => first + i);
+  return (
+    <div
+      ref={box}
+      className="cal-picker"
+      role="dialog"
+      aria-label="pick a month"
+      onKeyDown={(e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); onClose(true); } }}
+    >
+      <div className="mp-grid">
+        {years.map((y) => (
+          <button key={y} className={`mp-year${y === year ? ' current' : ''}`} aria-pressed={y === year} onClick={() => setYear(y)}>
+            {y === year ? `[${y}]` : y}
+          </button>
+        ))}
+      </div>
+      <div className="mp-grid mp-months">
+        {MONTHS.map((m, i) => {
+          const idx = year * 12 + i;
+          const shown = idx === nav.idx;
+          return (
+            <button
+              key={m}
+              className={`mp-month${shown ? ' current' : ''}${idx === nav.now ? ' now' : ''}`}
+              aria-label={`${m} ${year}`}
+              aria-current={shown ? 'date' : undefined}
+              onClick={() => onPick(idx)}
+            >
+              {shown ? `[${m.slice(0, 3)}]` : m.slice(0, 3)}
+            </button>
+          );
+        })}
+      </div>
+      <button className="mp-today" onClick={() => onPick(nav.now)}>today</button>
     </div>
   );
 }
@@ -308,7 +370,7 @@ function DesktopCalendar() {
     const onKey = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-      if ((document.activeElement as Element | null)?.closest?.('input, textarea, [role="menu"], .cal-pop')) return;
+      if ((document.activeElement as Element | null)?.closest?.('input, textarea, [role="menu"], .cal-pop, .cal-picker')) return;
       e.preventDefault();
       navRef.current(idxRef.current + (e.key === 'ArrowLeft' ? -1 : 1));
     };

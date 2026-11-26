@@ -395,14 +395,31 @@ input:focus-visible{outline:none}
 .cal-box{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border:1.3px solid var(--ink);
   border-radius:3px;font-size:9px;line-height:1;color:var(--bg)}
 .cal-toggle.on .cal-box{background:var(--ink)}
-.cal-nav{display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:13px;white-space:nowrap}
+.cal-nav{position:relative;display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:13px;white-space:nowrap}
 .m .cal-nav{font-size:12px}
 /* 32px (44px phone) hit areas; negative margins keep the visible gap at 14px */
 .cal-arrow{display:inline-flex;align-items:center;justify-content:center;min-width:32px;min-height:32px;margin:0 -9px;color:var(--muted)}
 .m .cal-arrow{min-width:44px;min-height:44px;margin:0 -15px}
 .cal-arrow:hover{color:var(--ink)}
 .cal-arrow[aria-disabled="true"]{color:var(--muted-2);cursor:default}
-.cal-label{font-weight:500;color:var(--ink)}
+/* fixed width (longest label: "september 2026" / "sep 2026"), centered, so neither arrow moves */
+.cal-label{width:14ch;text-align:center;font-weight:500;color:var(--ink)}
+.m .cal-label{width:8ch}
+@media (hover:hover){.cal-label:hover{color:var(--muted)}}
+
+/* month picker under the label */
+.cal-picker{position:absolute;top:calc(100% + 8px);right:0;z-index:20;width:264px;padding:12px;display:flex;flex-direction:column;gap:10px;
+  background:var(--surface);border:1px solid var(--line);border-radius:6px;box-shadow:0 8px 28px rgba(31,30,28,.10)}
+.mp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px}
+.mp-months{padding-top:10px;border-top:1px solid var(--line)}
+.mp-year,.mp-month{height:30px;border-radius:4px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.m .mp-year,.m .mp-month{height:40px;font-size:13px}
+.mp-year:hover,.mp-month:hover{background:var(--bg);color:var(--ink)}
+.mp-year.current,.mp-month.current{color:var(--ink);font-weight:500}
+.mp-month.now{color:var(--ink)}
+.mp-today{align-self:flex-start;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.m .mp-today{min-height:40px;font-size:13px}
+.mp-today:hover{color:var(--ink)}
 
 .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--ink)}
 .cal-wd{font-family:var(--mono);font-size:11px;color:var(--muted);padding:8px 0 8px 8px}

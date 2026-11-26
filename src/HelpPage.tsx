@@ -49,7 +49,7 @@ const desktopCopy: Record<string, Rows> = {
     ['add', 'click a day, type a name. time and note are optional'],
     ['edit', 'click a plan'],
     ['delete', 'click a plan → delete → yes'],
-    ['month', <><Ui>‹</Ui> <Ui>›</Ui>, or the arrow keys. click the month name to jump to today</>],
+    ['month', <><Ui>‹</Ui> <Ui>›</Ui>, or the arrow keys. click the month name to pick any month</>],
     ['homework', <><Ui>show assignments</Ui> puts list items on their due dates</>],
   ],
 };
@@ -78,7 +78,7 @@ const mobileCopy: Record<string, Rows> = {
     ['add', 'tap a day, then + add'],
     ['edit', 'tap a plan'],
     ['delete', 'tap a plan → delete → yes'],
-    ['month', <>swipe the month or tap <Ui>‹</Ui> <Ui>›</Ui>. tap the month name to jump to today</>],
+    ['month', <>swipe the month or tap <Ui>‹</Ui> <Ui>›</Ui>. tap the month name to pick any month</>],
     ['homework', <><Ui>assignments</Ui> puts list items on their due dates</>],
   ],
 };
