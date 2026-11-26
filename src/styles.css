@@ -546,7 +546,7 @@ textarea{font:inherit;color:inherit;margin:0;outline:none}
 .cal-cell > *{flex:none}
 .cal-cell[data-compact]{padding:5px 8px;gap:3px}
 /* hovering an item means edit (or open), not add: highlight the item, not the day */
-.cal-plan{border-radius:3px;padding:0 4px;margin:0 -4px;max-width:calc(100% + 8px)}
+.cal-plan{border-radius:3px;padding:0 6px;border:1px solid transparent} /* same box as .cal-asg, so the hover bar lines up with assignment bars */
 .cal-plan:hover,.cal-plan.editing{background:var(--line)}
 .cal-asg:hover{border-color:var(--st-fg)}
 .cal-cell:has(.cal-plan:hover,.cal-asg:hover,.cal-more:hover):not(.open){background:transparent}
