@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useStore } from './store';
-import { InlineConfirm, noAuto, useLongPress } from './components';
+import { InlineConfirm, halfTypedTime, noAuto, useLongPress } from './components';
 import {
   activeOf, chipClass, finishedOf, formatDate, formatTime, isDueSoon, isExam, isFinished,
   parseDateInput, parseTimeInput, statusOptions, toDateInput, toTimeInput, uid,
@@ -102,7 +102,9 @@ function AddForm({ initial, onSubmit, onCancel, onDelete }: {
   const [exam, setExam] = useState(initial ? isExam(initial.status) : false);
   const [confirming, setConfirming] = useState(false);
   const [dateError, setDateError] = useState(false);
+  const [timeError, setTimeError] = useState(false);
   const nameRef = useRef<HTMLInputElement>(null);
+  const box = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = nameRef.current;
@@ -114,8 +116,10 @@ function AddForm({ initial, onSubmit, onCancel, onDelete }: {
   const submit = () => {
     const n = name.trim();
     const d = parseDateInput(date);
+    const half = halfTypedTime(box.current);
     if (!d) setDateError(true);
-    if (!n || !d) return;
+    setTimeError(half);
+    if (!n || !d || half) return;
     lastDate = date;
     onSubmit({ name: n, ...d, time: parseTimeInput(time), exam });
   };
@@ -125,6 +129,7 @@ function AddForm({ initial, onSubmit, onCancel, onDelete }: {
   return (
     <div
       className="addform"
+      ref={box}
       onKeyDown={(e) => {
         if (e.key === 'Escape') { e.preventDefault(); onCancel(); }
         else if (e.key === 'Enter' && (e.target as Element).tagName === 'INPUT') { e.preventDefault(); submit(); }
@@ -141,9 +146,10 @@ function AddForm({ initial, onSubmit, onCancel, onDelete }: {
       />
       <div className="addform-when">
         <input type="date" className="addform-date" aria-label="due date" value={date} onChange={(e) => { setDate(e.target.value); setDateError(false); }} />
-        <input type="time" className="addform-time" aria-label="due time" value={time} onChange={(e) => setTime(e.target.value)} />
+        <input type="time" className="addform-time" aria-label="due time" value={time} onChange={(e) => { setTime(e.target.value); setTimeError(false); }} />
       </div>
       {dateError && <div className="msg error" role="alert">pick a date</div>}
+      {timeError && <div className="msg error" role="alert">finish the time (am / pm)</div>}
       <div className="type-switch" role="radiogroup" aria-label="type">
         {types.map(([label, isEx]) => (
           <button

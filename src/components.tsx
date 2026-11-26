@@ -152,6 +152,10 @@ export function NameInput(props: {
   );
 }
 
+/** a time field with only some of hh / mm / am-pm typed reports value '' — catch it instead of saving no time */
+export const halfTypedTime = (root: HTMLElement | null) =>
+  Array.from(root?.querySelectorAll<HTMLInputElement>('input[type="time"]') ?? []).some((i) => i.validity.badInput);
+
 /** scroll a sideways strip just enough to show all of el */
 export function revealIn(strip: HTMLElement | null, el: HTMLElement | null) {
   if (!strip || !el) return;

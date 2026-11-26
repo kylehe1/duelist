@@ -145,7 +145,7 @@ input:focus-visible{outline:none}
 .addform-date,.addform-time{font-family:var(--mono);font-size:11px;padding:4px;border:1px solid var(--input-border);
   border-radius:4px;background:var(--surface);color:var(--ink)}
 .addform-date{flex:1;min-width:0}
-.addform-time{width:80px}
+.addform-time{width:96px} /* wide enough to show am/pm: hidden, a typed time stayed unfinished and never saved */
 .addform-buttons{display:flex;gap:14px;align-items:center}
 .addform-submit{background:var(--ink);color:var(--bg);font-family:var(--sans);font-size:12px;padding:5px 12px;border-radius:4px}
 .addform-cancel{font-family:var(--sans);font-size:12px;color:var(--muted)}
@@ -512,3 +512,5 @@ textarea{font:inherit;color:inherit;margin:0;outline:none}
 .cal-asg:hover{border-color:var(--st-fg)}
 .cal-cell:has(.cal-plan:hover,.cal-asg:hover,.cal-more:hover):not(.open){background:transparent}
 .cal-cell:has(.cal-plan:hover,.cal-asg:hover,.cal-more:hover) .cal-plus{opacity:0}
+/* desktop: time fields are typed, not picked (no clock button), the same in the list and the calendar */
+.d input[type="time"]::-webkit-calendar-picker-indicator{display:none}

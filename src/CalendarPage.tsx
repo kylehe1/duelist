@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode }
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useStore } from './store';
 import { useIsDesktop } from './useIsDesktop';
-import { InlineConfirm, ProfileMenu, TitleRow, noAuto, useLongPress } from './components';
+import { InlineConfirm, ProfileMenu, TitleRow, halfTypedTime, noAuto, useLongPress } from './components';
 import { ListUIProvider, StatusPicker } from './course';
 import { chipClass, formatRange, toTimeInput, uid, type Assignment, type Plan } from './model';
 
@@ -266,6 +266,7 @@ function PlanForm({ date, plan, onClose, mobile }: { date: Ymd; plan?: Plan; onC
   const [confirming, setConfirming] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
+  const [timeError, setTimeError] = useState(false);
 
   useEffect(() => {
     const el = nameRef.current;
@@ -281,7 +282,9 @@ function PlanForm({ date, plan, onClose, mobile }: { date: Ymd; plan?: Plan; onC
 
   const save = () => {
     const n = name.trim();
-    if (!n) return;
+    const half = halfTypedTime(box.current);
+    setTimeError(half);
+    if (!n || half) return;
     const time = parseClock(start);
     const e = time == null ? null : parseClock(end);
     const fields = { name: n, time, endTime: e != null && e > time! ? e : null, note: note.trim() ? note : '' };
@@ -310,10 +313,11 @@ function PlanForm({ date, plan, onClose, mobile }: { date: Ymd; plan?: Plan; onC
     >
       <input ref={nameRef} className="plan-name" placeholder="name" aria-label="plan name" value={name} onChange={(e) => setName(e.target.value)} {...noAuto} />
       <div className="plan-times">
-        <input type="time" className="plan-time" aria-label="start time" value={start} onChange={(e) => setStart(e.target.value)} />
+        <input type="time" className="plan-time" aria-label="start time" value={start} onChange={(e) => { setStart(e.target.value); setTimeError(false); }} />
         <span className="plan-dash" aria-hidden="true">–</span>
-        <input type="time" className="plan-time" aria-label="end time" value={end} disabled={!start} onChange={(e) => setEnd(e.target.value)} />
+        <input type="time" className="plan-time" aria-label="end time" value={end} disabled={!start} onChange={(e) => { setEnd(e.target.value); setTimeError(false); }} />
       </div>
+      {timeError && <div className="msg error" role="alert">finish the time (am / pm)</div>}
       <textarea className="plan-note" placeholder="note" aria-label="note" value={note} onChange={(e) => setNote(e.target.value)} {...noAuto} />
       {plan && confirming ? (
         <div className="edit-confirm">
