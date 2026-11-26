@@ -392,6 +392,24 @@ function DesktopCalendar() {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  // day boxes shrink (112px down to 86px) so all six weeks fit the window; below that the page scrolls
+  const grid = useRef<HTMLDivElement>(null);
+  const [cellH, setCellH] = useState(112);
+  useLayoutEffect(() => {
+    const fit = () => {
+      const g = grid.current;
+      if (!g) return;
+      const rowsTop = g.getBoundingClientRect().top + window.scrollY + (g.querySelector<HTMLElement>('.cal-wd')?.offsetHeight ?? 0);
+      setCellH(Math.max(86, Math.min(112, Math.floor((window.innerHeight - rowsTop - 32) / 6))));
+    };
+    fit();
+    void document.fonts?.ready.then(fit);
+    window.addEventListener('resize', fit);
+    return () => window.removeEventListener('resize', fit);
+  }, []);
+  // how many items fit: 3 plus "+N more" needs the full 112px; 3 alone needs 90px (tighter padding below 100px); else 2
+  const limitFor = (total: number) => (cellH >= 111 || (total <= 3 && cellH >= 90) ? 3 : 2);
+
   const cells = monthGrid(nav.year, nav.month);
   const openKey = open && keyOf(open.date);
 
@@ -430,7 +448,7 @@ function DesktopCalendar() {
         <div className="d-head-right"><ProfileMenu /></div>
       </header>
       <Controls nav={nav} desktop onNav={navTo} />
-      <div className="cal-grid">
+      <div className="cal-grid" ref={grid}>
         {['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((w) => <div key={w} className="cal-wd">{w}</div>)}
         {cells.map((d, i) => {
           const k = keyOf(d);
@@ -448,7 +466,8 @@ function DesktopCalendar() {
             ...items.asg.map((x) => (
               <button key={x.a.id} className={`cal-asg st-${chipClass(x.a.status)}`} onClick={() => jump(x)}>{x.a.name}</button>
             )),
-          ].slice(0, 3);
+          ];
+          const limit = limitFor(total);
           // a neighboring month's day: go to that month, then add there
           const add = () => {
             if (out) nav.go(idxOf(d));
@@ -458,13 +477,15 @@ function DesktopCalendar() {
             <div
               key={k}
               className={`cal-cell${out ? ' out' : ''}${openKey === k ? ' open' : ''}`}
+              style={{ height: cellH }}
+              data-compact={cellH < 100 || undefined}
               onClick={(e) => { if (!(e.target as Element).closest('button, .cal-pop')) add(); }}
             >
               <span className={`cal-num${isToday ? ' today' : ''}`}>{isToday ? `[${d.day}]` : d.day}</span>
               <button className="cal-plus" aria-label={`add a plan on ${dayLabel(d)}`} onClick={add}>+</button>
-              {shown}
-              {total > 3 && (
-                <button className="cal-more" onClick={() => setOpen({ kind: 'day', date: d })}>+{total - 3} more</button>
+              {shown.slice(0, total > limit ? limit : total)}
+              {total > limit && (
+                <button className="cal-more" onClick={() => setOpen({ kind: 'day', date: d })}>+{total - limit} more</button>
               )}
               {openKey === k && (
                 <Popover key={`${nav.idx}:${open!.kind}:${'id' in open! ? open.id : ''}`} col={i % 7} onClose={close}>

@@ -502,3 +502,7 @@ textarea{font:inherit;color:inherit;margin:0;outline:none}
 .cal:has(.cal-picker) > :not(.cal-controls),
 .cal:has(.cal-picker) .cal-toggle,
 .cal:has(.cal-picker) .cal-arrow{pointer-events:none}
+
+.d.cal{padding-bottom:32px}
+.cal-cell > *{flex:none}
+.cal-cell[data-compact]{padding:5px 8px;gap:3px}
