@@ -458,13 +458,12 @@ function DesktopCalendar() {
           const isToday = same(d, today);
           const items = itemsOn(d);
           const total = items.plans.length + items.asg.length;
-          const timed = items.plans.slice(0, 2).some((p) => p.time != null);
           const shown = [
             ...items.plans.map((p) => (
               <button key={p.id} className={`cal-plan${open?.kind === 'edit' && open.id === p.id ? ' editing' : ''}`} onClick={() => setOpen({ kind: 'edit', id: p.id, date: d })}>
-                {/* fixed-width time column (empty for all-day) so names line up, but only if a shown plan has a time */}
-                {timed && <span className="cal-plan-time">{p.time != null ? formatRange(p.time, null) : ''}</span>}
+                {/* name on the left, start time pinned to the right edge */}
                 <span className="cal-plan-name">{p.name}</span>
+                {p.time != null && <span className="cal-plan-time">{formatRange(p.time, null)}</span>}
               </button>
             )),
             ...items.asg.map((x) => (
