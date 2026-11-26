@@ -180,7 +180,7 @@ input:focus-visible{outline:none}
 .m .add-btn{font-size:14px;height:48px;padding:0}
 
 .addform{display:flex;flex-direction:column;gap:10px;padding:14px 0;border-bottom:1px solid var(--ink)}
-.addform-name{font-family:var(--sans);font-size:14px;color:var(--ink)}
+.addform-name{font-family:var(--sans);font-size:14px;color:var(--ink);min-width:0;text-overflow:ellipsis}
 .addform-when{display:flex;gap:6px}
 .addform-date,.addform-time{font-family:var(--mono);font-size:11px;padding:4px;border:1px solid var(--input-border);
   border-radius:4px;background:var(--surface);color:var(--ink)}
@@ -506,7 +506,7 @@ input:focus-visible{outline:none}
 
 textarea{font:inherit;color:inherit;margin:0;outline:none}
 .plan-form{display:flex;flex-direction:column;gap:12px}
-.plan-name{font-family:var(--sans);font-size:14px;color:var(--ink);padding-bottom:6px;border-bottom:1px solid var(--line)}
+.plan-name{font-family:var(--sans);font-size:14px;color:var(--ink);padding-bottom:6px;border-bottom:1px solid var(--line);min-width:0;text-overflow:ellipsis}
 .plan-times{display:flex;gap:8px;align-items:center}
 .plan-time,.plan-note{background:var(--bg);border:1px solid var(--input-border);border-radius:5px;color:var(--ink)}
 .plan-time{flex:1;min-width:0;height:32px;padding:0 8px;font-family:var(--mono);font-size:12px}
