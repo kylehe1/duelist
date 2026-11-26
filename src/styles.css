@@ -94,7 +94,6 @@ input:focus-visible{outline:none}
 .row-left{display:flex;flex-direction:column;gap:4px;min-width:0}
 .row-name{font-family:var(--sans);font-weight:400;font-size:14px;color:var(--ink);overflow-wrap:anywhere}
 .row-date{font-family:var(--mono);font-weight:400;font-size:12px;color:var(--muted)}
-.row-date.soon{color:var(--ink)}
 .row-time{margin-left:5px;font-size:10px}
 .m .row{padding:16px 0}
 .m .row-name{font-size:16px}
@@ -514,3 +513,16 @@ textarea{font:inherit;color:inherit;margin:0;outline:none}
 .cal-cell:has(.cal-plan:hover,.cal-asg:hover,.cal-more:hover) .cal-plus{opacity:0}
 /* desktop: time fields are typed, not picked (no clock button), the same in the list and the calendar */
 .d input[type="time"]::-webkit-calendar-picker-indicator{display:none}
+
+/* 16c: urgency marks in a gutter before the name. ! due soon, !! late; dates are always muted */
+.row-line{display:flex;align-items:baseline;gap:8px;min-width:0}
+.mark-gutter{flex:none;width:14px;font-family:var(--mono);font-weight:500;font-size:12px;line-height:1;color:var(--ink)}
+.mark-gutter.mark-late{color:var(--error)}
+.m .mark-gutter{width:16px;font-size:13px}
+.row-line + .row-date{padding-left:22px}
+.m .row-line + .row-date{padding-left:24px}
+.addform-edit{padding-left:22px}
+.m .addform-edit{padding-left:24px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.help-mark{font-weight:500;color:var(--ink)}
+.help-mark.late{color:var(--error)}

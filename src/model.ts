@@ -64,10 +64,14 @@ export function compareAssignments(a: Assignment, b: Assignment) {
   );
 }
 
-export function isDueSoon(a: Assignment, now = new Date()) {
-  if (isFinished(a.status)) return false;
+/** spec 16c. 'late' (!!): active and the due moment has passed (no time = 11:59pm; 9am is late from 9:01).
+ *  'soon' (!): active, not late, due today, tomorrow or the day after. Finished items never get a mark. */
+export function urgency(a: Assignment, now = new Date()): 'late' | 'soon' | null {
+  if (isFinished(a.status)) return null;
+  const due = new Date(a.year, a.month - 1, a.day, 0, a.time ?? 1439);
+  if (now.getTime() >= due.getTime() + 60_000) return 'late';
   const limit = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2);
-  return new Date(a.year, a.month - 1, a.day) <= limit;
+  return new Date(a.year, a.month - 1, a.day) <= limit ? 'soon' : null;
 }
 
 export const activeOf = (c: Course) =>

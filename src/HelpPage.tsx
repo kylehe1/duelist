@@ -6,7 +6,7 @@ import { useIsDesktop } from './useIsDesktop';
 const Ui = ({ children }: { children: ReactNode }) => <span className="help-ui">{children}</span>;
 const Glyph = () => <span className="glyph glyph-sm" role="img" aria-label="the person button" />;
 
-type Rows = [string, ReactNode][];
+type Rows = [ReactNode, ReactNode][];
 
 function Section({ title, rows, children }: { title: string; rows?: Rows; children?: ReactNode }) {
   return (
@@ -15,8 +15,8 @@ function Section({ title, rows, children }: { title: string; rows?: Rows; childr
         <span className="col-mark">##</span>
         <span className="help-title">{title}</span>
       </div>
-      {rows?.map(([k, v]) => (
-        <div className="help-row" key={k}>
+      {rows?.map(([k, v], i) => (
+        <div className="help-row" key={i}>
           <span className="help-key">{k}</span>
           <span className="help-text">{v}</span>
         </div>
@@ -84,7 +84,8 @@ const mobileCopy: Record<string, Rows> = {
 };
 
 const littleThings = (verb: string): Rows => [
-  ['due soon', 'dates go dark when something is due within 2 days, or late'],
+  [<span className="help-mark">!</span>, 'due within 2 days'],
+  [<span className="help-mark late">!!</span>, 'late'],
   ['finished', <><Ui>▸ finished (N)</Ui> opens what's done. closed again next visit</>],
   ['phrase', <>the <Ui>#</Ui> line under the name belongs to the term. {verb} to rewrite it</>],
   ['order', 'sorted by due date, soonest first'],

@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState
 import { useStore } from './store';
 import { InlineConfirm, halfTypedTime, noAuto, useLongPress } from './components';
 import {
-  activeOf, chipClass, finishedOf, formatDate, formatTime, isDueSoon, isExam, isFinished,
+  activeOf, chipClass, finishedOf, formatDate, formatTime, isExam, isFinished, urgency,
   parseDateInput, parseTimeInput, statusOptions, toDateInput, toTimeInput, uid,
   type AppState, type Assignment, type Course, type Status,
 } from './model';
@@ -128,7 +128,7 @@ function AddForm({ initial, onSubmit, onCancel, onDelete }: {
 
   return (
     <div
-      className="addform"
+      className={`addform${initial ? ' addform-edit' : ''}`}
       ref={box}
       onKeyDown={(e) => {
         if (e.key === 'Escape') { e.preventDefault(); onCancel(); }
@@ -282,7 +282,8 @@ export function StatusPicker({ a, courseId, small }: { a: Assignment; courseId: 
   );
 }
 
-function AssignmentRow({ a, courseId, finished }: { a: Assignment; courseId: string; finished?: boolean }) {
+function AssignmentRow({ a, courseId, finished, now }: { a: Assignment; courseId: string; finished?: boolean; now: Date }) {
+  const mark = urgency(a, now);
   const ui = useListUI();
   const openEdit = () => ui.setForm({ courseId, editId: a.id });
   const longPress = useLongPress(openEdit);
@@ -310,8 +311,13 @@ function AssignmentRow({ a, courseId, finished }: { a: Assignment; courseId: str
   return (
     <div className="row" data-aid={a.id} {...handlers}>
       <div className="row-left">
-        <span className="row-name">{a.name}</span>
-        <span className={`row-date${isDueSoon(a) ? ' soon' : ''}`}>
+        <span className="row-line">
+          <span className={`mark-gutter${mark ? ` mark-${mark}` : ''}`}>
+            {mark && <><span aria-hidden="true">{MARKS[mark][0]}</span><span className="sr-only">{MARKS[mark][1]}</span></>}
+          </span>
+          <span className="row-name">{a.name}</span>
+        </span>
+        <span className="row-date">
           {formatDate(a)}
           {a.time != null && <span className="row-time">{formatTime(a.time)}</span>}
           {edit}
@@ -326,8 +332,23 @@ function AssignmentRow({ a, courseId, finished }: { a: Assignment; courseId: str
 
 /* ---------- course body (shared by desktop column and mobile panel) ---------- */
 
+/** the current time, refreshed every minute and on window focus, so due marks change without a reload */
+function useNow() {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const tick = () => setNow(new Date());
+    const iv = window.setInterval(tick, 60_000);
+    window.addEventListener('focus', tick);
+    return () => { clearInterval(iv); window.removeEventListener('focus', tick); };
+  }, []);
+  return now;
+}
+
+const MARKS = { late: ['!!', 'late'], soon: ['!', 'due soon'] } as const;
+
 export function CourseBody({ course }: { course: Course }) {
   const { update } = useStore();
+  const now = useNow();
   const ui = useListUI();
   const active = activeOf(course);
   const finished = finishedOf(course);
@@ -359,7 +380,7 @@ export function CourseBody({ course }: { course: Course }) {
     />
   );
   const renderRow = (a: Assignment, isDone?: boolean) =>
-    form?.editId === a.id ? editForm(a) : <AssignmentRow key={a.id} a={a} courseId={course.id} finished={isDone} />;
+    form?.editId === a.id ? editForm(a) : <AssignmentRow key={a.id} a={a} courseId={course.id} finished={isDone} now={now} />;
 
   const addNew = (v: FormValues) => {
     const { exam, ...rest } = v;
